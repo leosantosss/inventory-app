@@ -27,11 +27,17 @@ export const authOptions: NextAuthOptions = {
   pages: { signIn: '/login' },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.username = (user as any).username
+      if (user) {
+        token.username = (user as any).username
+        token.id = user.id
+      }
       return token
     },
     async session({ session, token }) {
-      if (session.user) session.user.username = token.username
+      if (session.user) {
+        session.user.username = token.username
+        ;(session.user as any).id = token.id
+      }
       return session
     },
   },
