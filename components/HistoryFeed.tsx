@@ -29,7 +29,7 @@ function SessionCard({ entry }: { entry: HistoryEntry }) {
         </div>
         <span className="text-xs text-gray-400">{formatDate(entry.createdAt)}</span>
       </div>
-      <p className="text-sm text-gray-600 mb-3 italic">"{entry.note}"</p>
+      <p className="text-sm text-gray-600 mb-3 italic">&quot;{entry.note}&quot;</p>
       <div className="flex flex-col gap-1">
         {entry.logs.map((log) => (
           <div key={log._id} className="flex justify-between text-sm">
