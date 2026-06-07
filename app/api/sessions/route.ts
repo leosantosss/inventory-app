@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   const session = await createUpdateSession({
-    userId: (authSession.user as any).id ?? '',
+    userId: (authSession.user as { id?: string }).id ?? '',
     displayName: authSession.user?.name ?? 'Unknown',
     direction: body.direction,
     note: body.note,
