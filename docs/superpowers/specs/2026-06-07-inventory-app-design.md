@@ -93,9 +93,9 @@ Bottom tab bar with four tabs:
 - Full-screen table of items for that category
 - Items sorted alphabetically
 - Each row shows: item name, current value (count or lbs)
-- **Pencil icon** on each row — opens edit form to rename, change unit type, or delete the item
-- **+ button** — opens add item form (name, category pre-filled, unit type, starting value)
-- **"Start Update" button** — begins a batch update session
+- **Pencil icon** on each row — opens edit form to rename, change unit type, or delete the item. Does NOT change quantities.
+- **+ button** — opens add item form (name, category pre-filled, unit type, starting value). Starting value is set here but does not generate a log entry.
+- **"Start Update" button** — the only way to change quantities. Every quantity change — whether one item or twenty — goes through this flow and requires a direction and note.
 
 ### Batch Update Flow
 
