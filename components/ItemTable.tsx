@@ -55,25 +55,16 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         <h1 className="font-display text-2xl font-bold text-forest">{categoryLabels[category]}</h1>
         <div className="flex gap-2">
           {!session && (
-            <>
-              <button
-                onClick={() => setShowAdd(true)}
-                className="w-10 h-10 rounded-full bg-forest text-white text-xl flex items-center justify-center shadow-sm hover:bg-forest-600 transition-colors"
-                aria-label="Add item"
-              >
-                +
-              </button>
-              <button
-                onClick={() => setShowStartUpdate(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
-                  <polyline points="19 5 12 12 5 5" />
-                </svg>
-                Update
-              </button>
-            </>
+            <button
+              onClick={() => setShowStartUpdate(true)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+                <polyline points="19 5 12 12 5 5" />
+              </svg>
+              Update
+            </button>
           )}
         </div>
       </div>
@@ -135,7 +126,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
       {items.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-gray-400 text-base">No items yet.</p>
-          <p className="text-gray-300 text-sm mt-1">Tap + to add your first item.</p>
+          <p className="text-gray-300 text-sm mt-1">Tap Update to add your first item.</p>
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-center text-gray-400 py-10">No items match &quot;{search}&quot;</p>
