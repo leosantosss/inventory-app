@@ -5,7 +5,6 @@ import dbConnect from './mongodb'
 import User from './models/User'
 
 export const authOptions: NextAuthOptions = {
-  debug: true,
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -17,10 +16,8 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.username || !credentials?.password) return null
         await dbConnect()
         const user = await User.findOne({ username: credentials.username.toLowerCase() })
-        console.log('[auth] user found:', !!user, 'username:', credentials.username.toLowerCase())
         if (!user) return null
         const valid = await bcrypt.compare(credentials.password, user.passwordHash)
-        console.log('[auth] password valid:', valid)
         if (!valid) return null
         return { id: user._id.toString(), name: user.displayName, username: user.username }
       },
