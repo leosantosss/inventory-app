@@ -57,7 +57,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
               onClick={() => setShowStartUpdate(true)}
               className="px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
             >
-              Start Update
+              Modify
             </button>
           )}
         </div>
@@ -68,7 +68,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowStartUpdate(false)}>
           <div className="bg-white w-full rounded-t-3xl p-6 pb-8" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
-            <h2 className="font-display text-xl font-bold text-forest mb-4">Start Update</h2>
+            <h2 className="font-display text-xl font-bold text-forest mb-4">Modify Inventory</h2>
             <div className="flex gap-3 mb-4">
               {(['out', 'in'] as const).map((d) => (
                 <button
