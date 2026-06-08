@@ -5,6 +5,7 @@ import dbConnect from './mongodb'
 import User from './models/User'
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   providers: [
     CredentialsProvider({
       name: 'credentials',
