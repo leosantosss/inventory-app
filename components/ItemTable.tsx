@@ -20,7 +20,7 @@ const categoryLabels: Record<Category, string> = {
 }
 
 export default function ItemTable({ items, category, onRefresh }: Props) {
-  const { session, startSession } = useUpdateSession()
+  const { session, startSession, setItemChange } = useUpdateSession()
   const [showAdd, setShowAdd] = useState(false)
   const [editItem, setEditItem] = useState<ItemDoc | null>(null)
   const [showStartUpdate, setShowStartUpdate] = useState(false)
@@ -39,36 +39,51 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
     setNote('')
   }
 
+  function handleItemAdded(item: ItemDoc) {
+    if (session) {
+      const val = item.unit === 'count' ? (item.currentCount ?? 0) : (item.currentLbs ?? 0)
+      if (val > 0) setItemChange(item._id, item.name, 0, val, item.unit)
+    }
+    setShowAdd(false)
+    onRefresh()
+  }
+
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="font-display text-2xl font-bold text-forest">{categoryLabels[category]}</h1>
         <div className="flex gap-2">
-          <button
-            onClick={() => setShowAdd(true)}
-            className="w-10 h-10 rounded-full bg-forest text-white text-xl flex items-center justify-center shadow-sm hover:bg-forest-600 transition-colors"
-            aria-label="Add item"
-          >
-            +
-          </button>
           {!session && (
-            <button
-              onClick={() => setShowStartUpdate(true)}
-              className="px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
-            >
-              Modify
-            </button>
+            <>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="w-10 h-10 rounded-full bg-forest text-white text-xl flex items-center justify-center shadow-sm hover:bg-forest-600 transition-colors"
+                aria-label="Add item"
+              >
+                +
+              </button>
+              <button
+                onClick={() => setShowStartUpdate(true)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+                  <polyline points="19 5 12 12 5 5" />
+                </svg>
+                Update
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      {/* Start Update modal */}
+      {/* Update modal */}
       {showStartUpdate && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowStartUpdate(false)}>
           <div className="bg-white w-full rounded-t-3xl p-6 pb-8" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
-            <h2 className="font-display text-xl font-bold text-forest mb-4">Modify Inventory</h2>
+            <h2 className="font-display text-xl font-bold text-forest mb-4">Update Inventory</h2>
             <div className="flex gap-3 mb-4">
               {(['out', 'in'] as const).map((d) => (
                 <button
@@ -133,6 +148,15 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
               <ItemRow key={item._id} item={item} onEdit={setEditItem} />
             )
           )}
+          {session && (
+            <button
+              onClick={() => setShowAdd(true)}
+              className="rounded-2xl border-2 border-dashed border-forest-100 bg-white flex flex-col items-center justify-center gap-1 min-h-[110px] text-forest-500 hover:border-forest hover:text-forest transition-colors"
+            >
+              <span className="text-2xl font-light">+</span>
+              <span className="text-xs font-medium">Add Item</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -140,7 +164,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         <AddItemModal
           category={category}
           onClose={() => setShowAdd(false)}
-          onSaved={() => { setShowAdd(false); onRefresh() }}
+          onSaved={handleItemAdded}
         />
       )}
 

@@ -1,11 +1,11 @@
 'use client'
 import { useState, FormEvent } from 'react'
-import type { Category, Unit } from '@/types'
+import type { Category, Unit, ItemDoc } from '@/types'
 
 interface Props {
   category: Category
   onClose: () => void
-  onSaved: () => void
+  onSaved: (item: ItemDoc) => void
 }
 
 const unitLabels: Record<Unit, string> = { count: 'Count (units)', lbs: 'Pounds (lbs)' }
@@ -19,12 +19,13 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch('/api/items', {
+    const res = await fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, category, unit, startingValue: parseFloat(startingValue) || 0 }),
     })
-    onSaved()
+    const item = await res.json()
+    onSaved(item)
   }
 
   return (
