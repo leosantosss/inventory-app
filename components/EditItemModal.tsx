@@ -33,46 +33,49 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-end z-50" onClick={onClose}>
-      <div className="bg-white w-full rounded-t-2xl p-6" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-xl font-bold mb-4">Edit Item</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border border-gray-300 rounded-xl px-4 py-3 text-lg"
-            required
-          />
-          <div className="flex gap-3">
-            {(['count', 'lbs'] as Unit[]).map((u) => (
-              <button
-                key={u}
-                type="button"
-                onClick={() => setUnit(u)}
-                className={`flex-1 py-3 rounded-xl font-semibold ${
-                  unit === u ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
-              >
-                {u === 'count' ? 'Count' : 'Pounds'}
-              </button>
-            ))}
-          </div>
-          <button
-            type="submit"
-            disabled={!name.trim() || saving}
-            className="bg-blue-600 text-white rounded-xl py-3 text-lg font-semibold disabled:opacity-40"
-          >
-            {saving ? 'Saving…' : 'Save Changes'}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="bg-red-50 text-red-600 rounded-xl py-3 text-lg font-semibold disabled:opacity-40"
-          >
-            {deleting ? 'Deleting…' : 'Delete Item'}
-          </button>
-        </form>
+    <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={onClose}>
+      <div className="bg-white w-full rounded-t-3xl pb-8" onClick={(e) => e.stopPropagation()}>
+        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mt-3 mb-5" />
+        <div className="px-6">
+          <h2 className="font-display text-xl font-bold text-forest mb-4">Edit Item</h2>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent"
+              required
+            />
+            <div className="flex gap-3">
+              {(['count', 'lbs'] as Unit[]).map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => setUnit(u)}
+                  className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-colors ${
+                    unit === u ? 'bg-forest text-white' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {u === 'count' ? 'Count' : 'Pounds'}
+                </button>
+              ))}
+            </div>
+            <button
+              type="submit"
+              disabled={!name.trim() || saving}
+              className="bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition-colors"
+            >
+              {saving ? 'Saving…' : 'Save Changes'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-crimson-50 hover:bg-crimson-100 text-crimson rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition-colors"
+            >
+              {deleting ? 'Deleting…' : 'Delete Item'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

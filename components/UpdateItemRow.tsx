@@ -18,6 +18,7 @@ export default function UpdateItemRow({ item }: Props) {
   }, [item._id])
 
   const label = item.unit === 'count' ? 'ct' : 'lbs'
+  const changed = pending !== undefined
 
   function handleChange(raw: string) {
     setValue(raw)
@@ -29,21 +30,25 @@ export default function UpdateItemRow({ item }: Props) {
     }
   }
 
-  const changed = pending !== undefined
-
   return (
-    <div className={`flex items-center justify-between py-4 px-4 border-b border-gray-100 ${changed ? 'bg-blue-50' : 'bg-white'}`}>
-      <span className="text-lg font-medium text-gray-900">{item.name}</span>
-      <div className="flex items-center gap-2">
+    <div className={`relative rounded-2xl p-4 flex flex-col shadow-sm min-h-[110px] border-l-4 transition-colors ${
+      changed
+        ? 'bg-forest-100 border-forest'
+        : 'bg-white border-gray-200'
+    }`}>
+      <span className="text-sm font-semibold text-gray-700 leading-snug">{item.name}</span>
+      <div className="mt-auto pt-3 flex flex-col items-center gap-0.5">
         <input
           type="number"
           min="0"
           step={item.unit === 'lbs' ? '0.1' : '1'}
           value={value}
           onChange={(e) => handleChange(e.target.value)}
-          className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-lg text-right"
+          className={`w-full rounded-xl px-2 py-1.5 text-2xl font-bold text-center transition-colors focus:outline-none focus:ring-2 focus:ring-forest-500 ${
+            changed ? 'bg-white border-2 border-forest' : 'bg-gray-50 border border-gray-200'
+          }`}
         />
-        <span className="text-sm text-gray-400 w-6">{label}</span>
+        <span className="text-xs text-gray-400">{label}</span>
       </div>
     </div>
   )

@@ -10,19 +10,21 @@ export default function ItemRow({ item, onEdit }: Props) {
   const label = item.unit === 'count' ? 'ct' : 'lbs'
 
   return (
-    <div className="flex items-center justify-between py-4 px-4 border-b border-gray-100 bg-white">
-      <span className="text-lg font-medium text-gray-900">{item.name}</span>
-      <div className="flex items-center gap-4">
-        <span className="text-lg text-gray-700">
-          {value ?? '—'} <span className="text-sm text-gray-400">{label}</span>
-        </span>
-        <button
-          onClick={() => onEdit(item)}
-          className="p-2 text-gray-400 hover:text-gray-700"
-          aria-label={`Edit ${item.name}`}
-        >
-          ✏️
-        </button>
+    <div className="relative bg-white rounded-2xl p-4 flex flex-col shadow-sm min-h-[110px] border-l-4 border-forest overflow-hidden">
+      <button
+        onClick={() => onEdit(item)}
+        className="absolute top-2.5 right-2.5 w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-forest hover:bg-forest-50 transition-colors"
+        aria-label={`Edit ${item.name}`}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+      </button>
+      <span className="text-sm font-semibold text-gray-700 pr-7 leading-snug">{item.name}</span>
+      <div className="mt-auto pt-3">
+        <span className="text-3xl font-bold text-forest">{value ?? '—'}</span>
+        <span className="text-xs font-medium text-gray-400 ml-1">{label}</span>
       </div>
     </div>
   )
