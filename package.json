@@ -14,7 +14,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "mongoose": "^9.6.3",
-    "next": "14.2.35",
+    "next": "^15.5.19",
     "next-auth": "^4.24.14",
     "react": "^18",
     "react-dom": "^18"
@@ -28,7 +28,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.35",
+    "eslint-config-next": "^15.5.19",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "postcss": "^8",
@@ -36,5 +36,8 @@
     "ts-jest": "^29.4.11",
     "tsx": "^4.22.4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }
