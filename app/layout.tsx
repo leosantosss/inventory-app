@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Playfair_Display } from 'next/font/google'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -21,12 +21,15 @@ export const metadata: Metadata = {
   title: 'Inventory',
   description: 'Restaurant inventory management',
   manifest: '/manifest.json',
-  themeColor: '#1B4332',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Inventory',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1B4332',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
