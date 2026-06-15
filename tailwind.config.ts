@@ -19,6 +19,7 @@ const config: Config = {
         },
         crimson: {
           DEFAULT: "#B91C1C",
+          800: "#7F1D1D",
           700: "#991B1B",
           100: "#FEE2E2",
           50:  "#FFF5F5",
