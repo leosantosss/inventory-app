@@ -11,7 +11,7 @@ export default function LoginPage() {
             INVENTORY
           </h1>
           <p className="text-forest-100 text-sm mt-1 tracking-widest uppercase">
-            Restaurant Management
+            Chychos
           </p>
         </div>
 

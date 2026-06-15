@@ -14,12 +14,15 @@ async function seed() {
   await mongoose.connect(uri)
 
   const { default: User } = await import('../lib/models/User')
-  const existing = await User.findOne({ username: username.toLowerCase() })
-  if (existing) { console.error(`User "${username}" already exists`); process.exit(1) }
-
   const passwordHash = await bcrypt.hash(password, 12)
-  await User.create({ username: username.toLowerCase(), passwordHash, displayName })
-  console.log(`Created user "${username}" (${displayName})`)
+  const existing = await User.findOne({ username: username.toLowerCase() })
+  if (existing) {
+    await User.updateOne({ username: username.toLowerCase() }, { passwordHash, displayName })
+    console.log(`Updated user "${username}" (${displayName})`)
+  } else {
+    await User.create({ username: username.toLowerCase(), passwordHash, displayName })
+    console.log(`Created user "${username}" (${displayName})`)
+  }
   await mongoose.disconnect()
 }
 
