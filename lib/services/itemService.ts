@@ -17,12 +17,14 @@ export async function createItem(data: {
   category: Category
   unit: Unit
   startingValue: number
+  subcategory?: string
 }) {
   await dbConnect()
   const item = new Item({
     name: data.name,
     category: data.category,
     unit: data.unit,
+    subcategory: data.subcategory ?? null,
     currentCount: data.unit === 'count' ? data.startingValue : null,
     currentLbs: data.unit === 'lbs' ? data.startingValue : null,
   })

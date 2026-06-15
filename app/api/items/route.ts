@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     category: body.category as Category,
     unit: body.unit as Unit,
     startingValue: body.startingValue ?? 0,
+    subcategory: body.subcategory ?? undefined,
   })
   return NextResponse.json(item, { status: 201 })
 }

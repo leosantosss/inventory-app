@@ -6,7 +6,14 @@ function formatDate(iso: string) {
   })
 }
 
-function DeltaBadge({ delta }: { delta: number }) {
+function DeltaBadge({ delta, isNewItem }: { delta: number; isNewItem?: boolean }) {
+  if (isNewItem) {
+    return (
+      <span className="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-600">
+        Added
+      </span>
+    )
+  }
   const positive = delta >= 0
   return (
     <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-md ${
@@ -41,8 +48,10 @@ function SessionCard({ entry }: { entry: HistoryEntry }) {
           <div key={log._id} className="flex justify-between items-center text-sm">
             <span className="text-gray-700 font-medium">{log.itemName}</span>
             <div className="flex items-center gap-2 text-gray-400">
-              <span className="text-xs">{log.oldValue} → {log.newValue} {log.unit}</span>
-              <DeltaBadge delta={log.delta} />
+              {!log.isNewItem && (
+                <span className="text-xs">{log.oldValue} → {log.newValue} {log.unit}</span>
+              )}
+              <DeltaBadge delta={log.delta} isNewItem={log.isNewItem} />
             </div>
           </div>
         ))}

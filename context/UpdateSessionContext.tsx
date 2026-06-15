@@ -14,6 +14,7 @@ interface ActiveSession {
   direction: Direction
   note: string
   changes: Map<string, PendingChange>
+  newItemIds: Set<string>
 }
 
 interface UpdateSessionContextType {
@@ -21,6 +22,7 @@ interface UpdateSessionContextType {
   startSession: (direction: Direction, note: string) => void
   setItemChange: (itemId: string, itemName: string, oldValue: number, newValue: number, unit: 'count' | 'lbs') => void
   clearItemChange: (itemId: string) => void
+  trackNewItem: (itemId: string) => void
   cancelSession: () => void
   submitSession: () => Promise<void>
   isSubmitting: boolean
@@ -33,7 +35,7 @@ export function UpdateSessionProvider({ children }: { children: ReactNode }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const startSession = useCallback((direction: Direction, note: string) => {
-    setSession({ direction, note, changes: new Map() })
+    setSession({ direction, note, changes: new Map(), newItemIds: new Set() })
   }, [])
 
   const setItemChange = useCallback(
@@ -61,6 +63,15 @@ export function UpdateSessionProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const trackNewItem = useCallback((itemId: string) => {
+    setSession((prev) => {
+      if (!prev) return null
+      const newItemIds = new Set(prev.newItemIds)
+      newItemIds.add(itemId)
+      return { ...prev, newItemIds }
+    })
+  }, [])
+
   const cancelSession = useCallback(() => setSession(null), [])
 
   const submitSession = useCallback(async () => {
@@ -71,10 +82,11 @@ export function UpdateSessionProvider({ children }: { children: ReactNode }) {
         itemId: c.itemId,
         newValue: c.newValue,
       }))
+      const newItemIds = Array.from(session.newItemIds)
       const res = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ direction: session.direction, note: session.note, changes }),
+        body: JSON.stringify({ direction: session.direction, note: session.note, changes, newItemIds }),
       })
       if (!res.ok) throw new Error('Failed to submit')
       setSession(null)
@@ -85,7 +97,7 @@ export function UpdateSessionProvider({ children }: { children: ReactNode }) {
 
   return (
     <UpdateSessionContext.Provider
-      value={{ session, startSession, setItemChange, clearItemChange, cancelSession, submitSession, isSubmitting }}
+      value={{ session, startSession, setItemChange, clearItemChange, trackNewItem, cancelSession, submitSession, isSubmitting }}
     >
       {children}
     </UpdateSessionContext.Provider>

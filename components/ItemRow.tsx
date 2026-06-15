@@ -22,6 +22,9 @@ export default function ItemRow({ item, onEdit }: Props) {
         </svg>
       </button>
       <span className="text-sm font-semibold text-gray-700 pr-7 leading-snug">{item.name}</span>
+      {item.subcategory && (
+        <span className="text-xs text-forest-400 capitalize mt-0.5">{item.subcategory}</span>
+      )}
       <div className="mt-auto pt-3">
         <span className="text-3xl font-bold text-forest">{value ?? '—'}</span>
         <span className="text-xs font-medium text-gray-400 ml-1">{label}</span>

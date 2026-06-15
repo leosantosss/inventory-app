@@ -5,7 +5,7 @@ import ItemRow from './ItemRow'
 import UpdateItemRow from './UpdateItemRow'
 import AddItemModal from './AddItemModal'
 import EditItemModal from './EditItemModal'
-import type { ItemDoc, Category } from '@/types'
+import type { ItemDoc, Category, AlcoholType } from '@/types'
 
 interface Props {
   items: ItemDoc[]
@@ -19,18 +19,28 @@ const categoryLabels: Record<Category, string> = {
   bar: 'Bar',
 }
 
+const alcoholTypes: AlcoholType[] = [
+  'tequila', 'vodka', 'whiskey', 'rum', 'mini tequila',
+  'gin', 'cognac', 'brandy', 'wine', 'liqueur', 'other',
+]
+
 export default function ItemTable({ items, category, onRefresh }: Props) {
-  const { session, startSession, setItemChange } = useUpdateSession()
+  const { session, startSession, setItemChange, trackNewItem } = useUpdateSession()
   const [showAdd, setShowAdd] = useState(false)
   const [editItem, setEditItem] = useState<ItemDoc | null>(null)
   const [showStartUpdate, setShowStartUpdate] = useState(false)
   const [direction, setDirection] = useState<'in' | 'out'>('out')
   const [note, setNote] = useState('')
   const [search, setSearch] = useState('')
+  const [subcategoryFilter, setSubcategoryFilter] = useState<AlcoholType | null>(null)
 
-  const filtered = search.trim()
+  const afterSearch = search.trim()
     ? items.filter((i) => i.name.toLowerCase().includes(search.toLowerCase()))
     : items
+
+  const filtered = category === 'bar' && subcategoryFilter
+    ? afterSearch.filter((i) => i.subcategory === subcategoryFilter)
+    : afterSearch
 
   function handleStartUpdate() {
     if (!note.trim()) return
@@ -41,6 +51,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
 
   function handleItemAdded(item: ItemDoc) {
     if (session) {
+      trackNewItem(item._id)
       const val = item.unit === 'count' ? (item.currentCount ?? 0) : (item.currentLbs ?? 0)
       if (val > 0) setItemChange(item._id, item.name, 0, val, item.unit)
     }
@@ -121,6 +132,35 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
           className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-base bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent"
         />
       </div>
+
+      {/* Alcohol type filter chips (bar only) */}
+      {category === 'bar' && (
+        <div className="flex gap-2 flex-wrap mb-4">
+          <button
+            onClick={() => setSubcategoryFilter(null)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              subcategoryFilter === null
+                ? 'bg-forest text-white'
+                : 'bg-white text-gray-500 border border-gray-200'
+            }`}
+          >
+            All
+          </button>
+          {alcoholTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => setSubcategoryFilter(subcategoryFilter === type ? null : type)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-colors ${
+                subcategoryFilter === type
+                  ? 'bg-forest text-white'
+                  : 'bg-white text-gray-500 border border-gray-200'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Item grid */}
       {!session && items.length === 0 ? (

@@ -41,6 +41,9 @@ export default function UpdateItemRow({ item }: Props) {
       changed ? 'bg-forest-100 border-forest' : 'bg-white border-gray-200'
     }`}>
       <span className="text-sm font-semibold text-gray-700 leading-snug">{item.name}</span>
+      {item.subcategory && (
+        <span className="text-xs text-forest-400 capitalize">{item.subcategory}</span>
+      )}
       <div className="mt-1 text-xs text-gray-400">
         {changed
           ? <span className="text-forest font-medium">{baseValue} → {newValue} {label}</span>

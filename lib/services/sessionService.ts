@@ -11,6 +11,7 @@ export async function createUpdateSession(data: {
   direction: Direction
   note: string
   changes: ChangeEntry[]
+  newItemIds?: string[]
 }) {
   await dbConnect()
 
@@ -21,6 +22,8 @@ export async function createUpdateSession(data: {
     note: data.note,
   })
 
+  const newItemIdSet = new Set(data.newItemIds ?? [])
+  const processedIds = new Set<string>()
   const logs: object[] = []
 
   for (const change of data.changes) {
@@ -38,7 +41,10 @@ export async function createUpdateSession(data: {
       newValue: change.newValue,
       delta,
       unit: item.unit,
+      isNewItem: newItemIdSet.has(String(item._id)),
     })
+
+    processedIds.add(String(item._id))
 
     if (item.unit === 'count') {
       item.currentCount = change.newValue
@@ -46,6 +52,25 @@ export async function createUpdateSession(data: {
       item.currentLbs = change.newValue
     }
     await item.save()
+  }
+
+  // Log newly added items that had no quantity change
+  for (const itemId of newItemIdSet) {
+    if (processedIds.has(itemId)) continue
+    const item = await Item.findById(itemId)
+    if (!item) continue
+
+    const value = item.unit === 'count' ? (item.currentCount ?? 0) : (item.currentLbs ?? 0)
+    logs.push({
+      sessionId: session._id,
+      itemId: item._id,
+      itemName: item.name,
+      oldValue: 0,
+      newValue: value,
+      delta: value,
+      unit: item.unit,
+      isNewItem: true,
+    })
   }
 
   await Log.insertMany(logs)

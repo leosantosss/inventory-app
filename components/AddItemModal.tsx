@@ -1,6 +1,6 @@
 'use client'
 import { useState, FormEvent } from 'react'
-import type { Category, Unit, ItemDoc } from '@/types'
+import type { Category, Unit, ItemDoc, AlcoholType } from '@/types'
 
 interface Props {
   category: Category
@@ -10,10 +10,16 @@ interface Props {
 
 const unitLabels: Record<Unit, string> = { count: 'Count (units)', lbs: 'Pounds (lbs)' }
 
+const alcoholTypes: AlcoholType[] = [
+  'tequila', 'vodka', 'whiskey', 'rum', 'mini tequila',
+  'gin', 'cognac', 'brandy', 'wine', 'liqueur', 'other',
+]
+
 export default function AddItemModal({ category, onClose, onSaved }: Props) {
   const [name, setName] = useState('')
   const [unit, setUnit] = useState<Unit>('count')
   const [startingValue, setStartingValue] = useState('0')
+  const [subcategory, setSubcategory] = useState<AlcoholType | ''>('')
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
@@ -22,7 +28,13 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
     const res = await fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, category, unit, startingValue: parseFloat(startingValue) || 0 }),
+      body: JSON.stringify({
+        name,
+        category,
+        unit,
+        startingValue: parseFloat(startingValue) || 0,
+        subcategory: subcategory || undefined,
+      }),
     })
     const item = await res.json()
     onSaved(item)
@@ -42,6 +54,27 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
               required
               className="border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent"
             />
+            {category === 'bar' && (
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-gray-500">Type</span>
+                <div className="flex gap-2 flex-wrap">
+                  {alcoholTypes.map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setSubcategory(subcategory === type ? '' : type)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-colors ${
+                        subcategory === type
+                          ? 'bg-forest text-white'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="flex gap-3">
               {(['count', 'lbs'] as Unit[]).map((u) => (
                 <button

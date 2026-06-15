@@ -13,7 +13,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'direction, note, and changes are required' }, { status: 400 })
   }
 
-  if (body.changes.length === 0) {
+  const newItemIds: string[] = Array.isArray(body.newItemIds) ? body.newItemIds : []
+
+  if (body.changes.length === 0 && newItemIds.length === 0) {
     return NextResponse.json({ error: 'No changes to submit' }, { status: 400 })
   }
 
@@ -23,6 +25,7 @@ export async function POST(request: NextRequest) {
     direction: body.direction,
     note: body.note,
     changes: body.changes,
+    newItemIds,
   })
 
   return NextResponse.json(session, { status: 201 })
