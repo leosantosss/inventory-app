@@ -123,15 +123,24 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
       </div>
 
       {/* Item grid */}
-      {items.length === 0 ? (
+      {!session && items.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-gray-400 text-base">No items yet.</p>
           <p className="text-gray-300 text-sm mt-1">Start an update to add your first item.</p>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : !session && filtered.length === 0 ? (
         <p className="text-center text-gray-400 py-10">No items match &quot;{search}&quot;</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {session && (
+            <button
+              onClick={() => setShowAdd(true)}
+              className="rounded-2xl border-2 border-dashed border-forest-100 bg-white flex flex-col items-center justify-center gap-1 min-h-[110px] text-forest-500 hover:border-forest hover:text-forest transition-colors"
+            >
+              <span className="text-2xl font-light">+</span>
+              <span className="text-xs font-medium">Add Item</span>
+            </button>
+          )}
           {filtered.map((item) =>
             session ? (
               <UpdateItemRow key={item._id} item={item} />
@@ -139,18 +148,6 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
               <ItemRow key={item._id} item={item} onEdit={setEditItem} />
             )
           )}
-        </div>
-      )}
-
-      {session && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mt-3">
-          <button
-            onClick={() => setShowAdd(true)}
-            className="rounded-2xl border-2 border-dashed border-forest-100 bg-white flex flex-col items-center justify-center gap-1 min-h-[110px] text-forest-500 hover:border-forest hover:text-forest transition-colors"
-          >
-            <span className="text-2xl font-light">+</span>
-            <span className="text-xs font-medium">Add Item</span>
-          </button>
         </div>
       )}
 
