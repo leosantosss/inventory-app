@@ -33,7 +33,7 @@ export async function createItem(data: {
 
 export async function updateItemMetadata(
   id: string,
-  data: { name?: string; unit?: Unit }
+  data: { name?: string; unit?: Unit; subcategory?: string | null }
 ) {
   await dbConnect()
   return Item.findByIdAndUpdate(id, data, { new: true })
