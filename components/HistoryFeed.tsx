@@ -26,7 +26,7 @@ function DeltaBadge({ delta, isNewItem }: { delta: number; isNewItem?: boolean }
 
 function SessionCard({ entry }: { entry: HistoryEntry }) {
   return (
-    <div className="bg-white rounded-2xl border-l-4 p-4 mb-3 shadow-sm" style={{
+    <div className="print-card bg-white rounded-2xl border-l-4 p-4 mb-3 shadow-sm" style={{
       borderLeftColor: entry.direction === 'in' ? '#2D6A4F' : '#B91C1C'
     }}>
       <div className="flex items-start justify-between mb-2">
@@ -60,7 +60,7 @@ function SessionCard({ entry }: { entry: HistoryEntry }) {
   )
 }
 
-export default function HistoryFeed({ entries }: { entries: HistoryEntry[] }) {
+export default function HistoryFeed({ entries, hideTitle }: { entries: HistoryEntry[]; hideTitle?: boolean }) {
   if (entries.length === 0) {
     return (
       <div className="text-center py-20">
@@ -70,7 +70,7 @@ export default function HistoryFeed({ entries }: { entries: HistoryEntry[] }) {
   }
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-forest mb-4">History</h1>
+      {!hideTitle && <h1 className="font-display text-2xl font-bold text-forest mb-4">History</h1>}
       {entries.map((entry) => (
         <SessionCard key={entry._id} entry={entry} />
       ))}

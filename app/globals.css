@@ -19,3 +19,20 @@ input[type='number']::-webkit-outer-spin-button {
 input[type='number'] {
   -moz-appearance: textfield;
 }
+
+@media print {
+  /* Hide everything except the history content */
+  header, nav, .print-hide { display: none !important; }
+
+  body { background: white !important; color: black !important; }
+
+  /* Remove padding added for the bottom tab bar */
+  .pb-24 { padding-bottom: 0 !important; }
+
+  /* Keep session cards readable */
+  .bg-white { background: white !important; }
+  .shadow-sm, .shadow-md { box-shadow: none !important; }
+
+  /* Force page breaks between long histories */
+  .print-card { page-break-inside: avoid; }
+}
