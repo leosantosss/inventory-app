@@ -139,15 +139,18 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
               <ItemRow key={item._id} item={item} onEdit={setEditItem} />
             )
           )}
-          {session && (
-            <button
-              onClick={() => setShowAdd(true)}
-              className="rounded-2xl border-2 border-dashed border-forest-100 bg-white flex flex-col items-center justify-center gap-1 min-h-[110px] text-forest-500 hover:border-forest hover:text-forest transition-colors"
-            >
-              <span className="text-2xl font-light">+</span>
-              <span className="text-xs font-medium">Add Item</span>
-            </button>
-          )}
+        </div>
+      )}
+
+      {session && (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mt-3">
+          <button
+            onClick={() => setShowAdd(true)}
+            className="rounded-2xl border-2 border-dashed border-forest-100 bg-white flex flex-col items-center justify-center gap-1 min-h-[110px] text-forest-500 hover:border-forest hover:text-forest transition-colors"
+          >
+            <span className="text-2xl font-light">+</span>
+            <span className="text-xs font-medium">Add Item</span>
+          </button>
         </div>
       )}
 
