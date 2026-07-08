@@ -8,6 +8,9 @@ export interface IItem extends Document {
   subcategory?: string
   currentCount: number | null
   currentLbs: number | null
+  unitsPerBox: number | null
+  boxPrice: number | null
+  minStock: number | null
   createdAt: Date
 }
 
@@ -18,6 +21,9 @@ const ItemSchema = new Schema<IItem>({
   subcategory: { type: String, default: null },
   currentCount: { type: Number, default: null },
   currentLbs: { type: Number, default: null },
+  unitsPerBox: { type: Number, default: null },
+  boxPrice: { type: Number, default: null },
+  minStock: { type: Number, default: null },
   createdAt: { type: Date, default: Date.now },
 })
 

@@ -18,6 +18,9 @@ export async function createItem(data: {
   unit: Unit
   startingValue: number
   subcategory?: string
+  unitsPerBox?: number | null
+  boxPrice?: number | null
+  minStock?: number | null
 }) {
   await dbConnect()
   const item = new Item({
@@ -27,13 +30,23 @@ export async function createItem(data: {
     subcategory: data.subcategory ?? null,
     currentCount: data.unit === 'count' ? data.startingValue : null,
     currentLbs: data.unit === 'lbs' ? data.startingValue : null,
+    unitsPerBox: data.unitsPerBox ?? null,
+    boxPrice: data.boxPrice ?? null,
+    minStock: data.minStock ?? null,
   })
   return item.save()
 }
 
 export async function updateItemMetadata(
   id: string,
-  data: { name?: string; unit?: Unit; subcategory?: string | null }
+  data: {
+    name?: string
+    unit?: Unit
+    subcategory?: string | null
+    unitsPerBox?: number | null
+    boxPrice?: number | null
+    minStock?: number | null
+  }
 ) {
   await dbConnect()
   return Item.findByIdAndUpdate(id, data, { new: true })

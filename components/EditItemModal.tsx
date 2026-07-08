@@ -19,6 +19,9 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
   const [subcategory, setSubcategory] = useState<AlcoholType | ''>(
     (item.subcategory as AlcoholType) ?? ''
   )
+  const [unitsPerBox, setUnitsPerBox] = useState(item.unitsPerBox != null ? String(item.unitsPerBox) : '')
+  const [boxPrice, setBoxPrice] = useState(item.boxPrice != null ? String(item.boxPrice) : '')
+  const [minStock, setMinStock] = useState(item.minStock != null ? String(item.minStock) : '')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -28,7 +31,14 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
     await fetch(`/api/items/${item._id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, unit, subcategory: subcategory || null }),
+      body: JSON.stringify({
+        name,
+        unit,
+        subcategory: subcategory || null,
+        unitsPerBox: unitsPerBox.trim() ? parseFloat(unitsPerBox) : null,
+        boxPrice: boxPrice.trim() ? parseFloat(boxPrice) : null,
+        minStock: minStock.trim() ? parseFloat(minStock) : null,
+      }),
     })
     onSaved()
   }
@@ -88,6 +98,48 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
                 </button>
               ))}
             </div>
+            <div className="flex flex-col gap-2 pt-1 border-t border-gray-100">
+              <span className="text-sm font-medium text-gray-500 pt-3">Box &amp; Pricing (optional)</span>
+              <div className="grid grid-cols-3 gap-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Units/Box</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={unitsPerBox}
+                    onChange={(e) => setUnitsPerBox(e.target.value)}
+                    placeholder="—"
+                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Box Price ($)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={boxPrice}
+                    onChange={(e) => setBoxPrice(e.target.value)}
+                    placeholder="—"
+                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Min Stock</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={minStock}
+                    onChange={(e) => setMinStock(e.target.value)}
+                    placeholder="—"
+                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                  />
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={!name.trim() || saving}

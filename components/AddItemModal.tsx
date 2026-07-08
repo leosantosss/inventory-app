@@ -20,6 +20,9 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
   const [unit, setUnit] = useState<Unit>('count')
   const [startingValue, setStartingValue] = useState('0')
   const [subcategory, setSubcategory] = useState<AlcoholType | ''>('')
+  const [unitsPerBox, setUnitsPerBox] = useState('')
+  const [boxPrice, setBoxPrice] = useState('')
+  const [minStock, setMinStock] = useState('')
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
@@ -34,6 +37,9 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
         unit,
         startingValue: parseFloat(startingValue) || 0,
         subcategory: subcategory || undefined,
+        unitsPerBox: unitsPerBox.trim() ? parseFloat(unitsPerBox) : null,
+        boxPrice: boxPrice.trim() ? parseFloat(boxPrice) : null,
+        minStock: minStock.trim() ? parseFloat(minStock) : null,
       }),
     })
     const item = await res.json()
@@ -100,6 +106,49 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
               />
               <span className="text-gray-500 text-sm">starting {unit === 'count' ? 'count' : 'lbs'}</span>
             </div>
+
+            <div className="flex flex-col gap-2 pt-1 border-t border-gray-100">
+              <span className="text-sm font-medium text-gray-500 pt-3">Box &amp; Pricing (optional)</span>
+              <div className="grid grid-cols-3 gap-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Units/Box</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={unitsPerBox}
+                    onChange={(e) => setUnitsPerBox(e.target.value)}
+                    placeholder="—"
+                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Box Price ($)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={boxPrice}
+                    onChange={(e) => setBoxPrice(e.target.value)}
+                    placeholder="—"
+                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-400">Min Stock</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={minStock}
+                    onChange={(e) => setMinStock(e.target.value)}
+                    placeholder="—"
+                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                  />
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={!name.trim() || saving}

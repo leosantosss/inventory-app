@@ -11,6 +11,9 @@ export interface ItemDoc {
   subcategory?: string
   currentCount: number | null
   currentLbs: number | null
+  unitsPerBox: number | null
+  boxPrice: number | null
+  minStock: number | null
   createdAt: string
 }
 

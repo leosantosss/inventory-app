@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
     unit: body.unit as Unit,
     startingValue: body.startingValue ?? 0,
     subcategory: body.subcategory ?? undefined,
+    unitsPerBox: body.unitsPerBox ?? null,
+    boxPrice: body.boxPrice ?? null,
+    minStock: body.minStock ?? null,
   })
   return NextResponse.json(item, { status: 201 })
 }
