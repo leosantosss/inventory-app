@@ -1,6 +1,7 @@
 'use client'
 import { useState, FormEvent } from 'react'
 import type { ItemDoc, Unit, AlcoholType } from '@/types'
+import { useToast } from '@/context/ToastContext'
 
 interface Props {
   item: ItemDoc
@@ -14,6 +15,7 @@ const alcoholTypes: AlcoholType[] = [
 ]
 
 export default function EditItemModal({ item, onClose, onSaved }: Props) {
+  const { showToast } = useToast()
   const [name, setName] = useState(item.name)
   const [unit, setUnit] = useState<Unit>(item.unit)
   const [subcategory, setSubcategory] = useState<AlcoholType | ''>(
@@ -28,26 +30,40 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setSaving(true)
-    await fetch(`/api/items/${item._id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        unit,
-        subcategory: subcategory || null,
-        unitsPerBox: unitsPerBox.trim() ? parseFloat(unitsPerBox) : null,
-        boxPrice: boxPrice.trim() ? parseFloat(boxPrice) : null,
-        minStock: minStock.trim() ? parseFloat(minStock) : null,
-      }),
-    })
-    onSaved()
+    try {
+      const res = await fetch(`/api/items/${item._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          unit,
+          subcategory: subcategory || null,
+          unitsPerBox: unitsPerBox.trim() ? parseFloat(unitsPerBox) : null,
+          boxPrice: boxPrice.trim() ? parseFloat(boxPrice) : null,
+          minStock: minStock.trim() ? parseFloat(minStock) : null,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save item')
+      showToast(`"${name}" saved`)
+      onSaved()
+    } catch {
+      showToast('Could not save changes — check your connection and try again.', 'error')
+      setSaving(false)
+    }
   }
 
   async function handleDelete() {
     if (!confirm(`Delete "${item.name}"? This cannot be undone.`)) return
     setDeleting(true)
-    await fetch(`/api/items/${item._id}`, { method: 'DELETE' })
-    onSaved()
+    try {
+      const res = await fetch(`/api/items/${item._id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete item')
+      showToast(`"${item.name}" deleted`)
+      onSaved()
+    } catch {
+      showToast('Could not delete the item — check your connection and try again.', 'error')
+      setDeleting(false)
+    }
   }
 
   return (

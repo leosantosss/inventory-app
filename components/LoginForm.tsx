@@ -1,5 +1,5 @@
 'use client'
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -7,6 +7,13 @@ export default function LoginForm() {
   const router = useRouter()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [idleNotice, setIdleNotice] = useState(false)
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('reason') === 'idle') {
+      setIdleNotice(true)
+    }
+  }, [])
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -20,7 +27,7 @@ export default function LoginForm() {
     })
     setLoading(false)
     if (res?.ok) {
-      router.push('/inventory/cooler')
+      router.push('/inventory/dashboard')
     } else {
       setError('Invalid username or password')
     }
@@ -28,6 +35,11 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {idleNotice && (
+        <p className="text-forest text-sm font-medium bg-forest-50 px-3 py-2 rounded-lg">
+          You were signed out after 15 minutes of inactivity.
+        </p>
+      )}
       <div>
         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
           Username

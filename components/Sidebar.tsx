@@ -161,7 +161,7 @@ export default function Sidebar() {
       >
         <div className={`flex items-center h-14 px-4 ${collapsed ? 'justify-center' : 'justify-between'}`}>
           {!collapsed && (
-            <span className="font-display text-white text-base font-bold tracking-widest uppercase">Menu</span>
+            <span className="font-display text-white text-base font-bold tracking-widest uppercase">Chychos</span>
           )}
           <button
             onClick={() => setCollapsed((v) => !v)}
@@ -183,7 +183,7 @@ export default function Sidebar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between h-14 px-4">
-              <span className="font-display text-white text-base font-bold tracking-widest uppercase">Menu</span>
+              <span className="font-display text-white text-base font-bold tracking-widest uppercase">Chychos</span>
               <button
                 onClick={closeMobile}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition-colors"

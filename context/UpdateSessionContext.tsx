@@ -1,6 +1,7 @@
 'use client'
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import type { Direction } from '@/types'
+import { useToast } from './ToastContext'
 
 interface PendingChange {
   itemId: string
@@ -31,6 +32,7 @@ interface UpdateSessionContextType {
 const UpdateSessionContext = createContext<UpdateSessionContextType | null>(null)
 
 export function UpdateSessionProvider({ children }: { children: ReactNode }) {
+  const { showToast } = useToast()
   const [session, setSession] = useState<ActiveSession | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -89,11 +91,14 @@ export function UpdateSessionProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ direction: session.direction, note: session.note, changes, newItemIds }),
       })
       if (!res.ok) throw new Error('Failed to submit')
+      showToast('Inventory update saved')
       setSession(null)
+    } catch {
+      showToast('Could not save this update — check your connection and try again.', 'error')
     } finally {
       setIsSubmitting(false)
     }
-  }, [session])
+  }, [session, showToast])
 
   return (
     <UpdateSessionContext.Provider

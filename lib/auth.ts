@@ -23,7 +23,10 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  session: { strategy: 'jwt' },
+  // Idle-based logout is enforced client-side (components/IdleTimeout.tsx); these are
+  // a server-side backstop so a session can never outlive a single work shift even if
+  // the client-side timer never runs (e.g. JS disabled).
+  session: { strategy: 'jwt', maxAge: 60 * 60 * 4, updateAge: 60 * 15 },
   pages: { signIn: '/login' },
   callbacks: {
     async jwt({ token, user }) {

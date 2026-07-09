@@ -1,6 +1,7 @@
 'use client'
 import { useState, FormEvent } from 'react'
 import type { Category, Unit, ItemDoc, AlcoholType } from '@/types'
+import { useToast } from '@/context/ToastContext'
 
 interface Props {
   category: Category
@@ -16,6 +17,7 @@ const alcoholTypes: AlcoholType[] = [
 ]
 
 export default function AddItemModal({ category, onClose, onSaved }: Props) {
+  const { showToast } = useToast()
   const [name, setName] = useState('')
   const [unit, setUnit] = useState<Unit>('count')
   const [startingValue, setStartingValue] = useState('0')
@@ -28,22 +30,29 @@ export default function AddItemModal({ category, onClose, onSaved }: Props) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setSaving(true)
-    const res = await fetch('/api/items', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        category,
-        unit,
-        startingValue: parseFloat(startingValue) || 0,
-        subcategory: subcategory || undefined,
-        unitsPerBox: unitsPerBox.trim() ? parseFloat(unitsPerBox) : null,
-        boxPrice: boxPrice.trim() ? parseFloat(boxPrice) : null,
-        minStock: minStock.trim() ? parseFloat(minStock) : null,
-      }),
-    })
-    const item = await res.json()
-    onSaved(item)
+    try {
+      const res = await fetch('/api/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          category,
+          unit,
+          startingValue: parseFloat(startingValue) || 0,
+          subcategory: subcategory || undefined,
+          unitsPerBox: unitsPerBox.trim() ? parseFloat(unitsPerBox) : null,
+          boxPrice: boxPrice.trim() ? parseFloat(boxPrice) : null,
+          minStock: minStock.trim() ? parseFloat(minStock) : null,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to add item')
+      const item = await res.json()
+      showToast(`"${item.name}" added`)
+      onSaved(item)
+    } catch {
+      showToast('Could not add the item — check your connection and try again.', 'error')
+      setSaving(false)
+    }
   }
 
   return (

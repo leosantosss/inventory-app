@@ -1,11 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
 import HistoryFeed from '@/components/HistoryFeed'
+import { TableSkeleton } from '@/components/Skeleton'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import type { HistoryEntry } from '@/types'
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState<HistoryEntry[]>([])
   const [loading, setLoading] = useState(true)
+
+  useDocumentTitle('History')
 
   useEffect(() => {
     fetch('/api/history')
@@ -13,7 +17,7 @@ export default function HistoryPage() {
       .then((data) => { setEntries(data); setLoading(false) })
   }, [])
 
-  if (loading) return <div className="text-center text-gray-400 py-20">Loading…</div>
+  if (loading) return <TableSkeleton rows={5} />
 
   return (
     <div>

@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import HistoryFeed from '@/components/HistoryFeed'
+import { DashboardSkeleton } from '@/components/Skeleton'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import type { HistoryEntry, Category } from '@/types'
 
 interface LowStockItem {
@@ -121,6 +123,8 @@ function LowStockTable({ items }: { items: LowStockItem[] }) {
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
+  useDocumentTitle('Dashboard')
+
   useEffect(() => {
     fetch('/api/dashboard')
       .then((res) => res.json())
@@ -128,7 +132,7 @@ export default function DashboardPage() {
   }, [])
 
   if (!stats) {
-    return <div className="text-center text-gray-400 py-20">Loading…</div>
+    return <DashboardSkeleton />
   }
 
   return (

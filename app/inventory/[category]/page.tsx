@@ -2,10 +2,18 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import ItemTable from '@/components/ItemTable'
+import { TableSkeleton } from '@/components/Skeleton'
 import { useUpdateSession } from '@/context/UpdateSessionContext'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import type { ItemDoc, Category } from '@/types'
 
 const validCategories: Category[] = ['cooler', 'dry', 'bar']
+
+const categoryTitles: Record<Category, string> = {
+  cooler: 'Cooler',
+  dry: 'Dry Storage',
+  bar: 'Bar',
+}
 
 export default function CategoryPage() {
   const params = useParams()
@@ -13,6 +21,8 @@ export default function CategoryPage() {
   const { session } = useUpdateSession()
   const [items, setItems] = useState<ItemDoc[]>([])
   const [loading, setLoading] = useState(true)
+
+  useDocumentTitle(categoryTitles[category as Category] ?? 'Inventory')
 
   if (!validCategories.includes(category as Category)) notFound()
 
@@ -34,7 +44,7 @@ export default function CategoryPage() {
   }, [session])
 
   if (loading) {
-    return <div className="text-center text-gray-400 py-20">Loading…</div>
+    return <TableSkeleton />
   }
 
   return (
