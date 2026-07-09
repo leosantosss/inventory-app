@@ -75,7 +75,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="bg-crimson hover:bg-crimson-700 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-50 transition-colors mt-1"
+        className="bg-crimson hover:bg-crimson-700 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-50 transition active:scale-[0.98] mt-1"
       >
         {loading ? 'Signing in…' : 'Sign In'}
       </button>

@@ -1,8 +1,10 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import EditItemModal from './EditItemModal'
 import type { ItemDoc, Category } from '@/types'
 import { pricePerUnit, lineValue } from '@/lib/itemCalc'
+import { parseCSV, toCSV } from '@/lib/csv'
+import { useToast } from '@/context/ToastContext'
 
 type SortKey = 'name' | 'category' | 'unitsPerBox' | 'boxPrice' | 'pricePerUnit' | 'value'
 
@@ -34,7 +36,16 @@ const categoryFilters: { label: string; value: Category | null }[] = [
   { label: 'Dry Storage', value: 'dry' },
 ]
 
+const labelToCategory: Record<string, Category> = {
+  cooler: 'cooler', bar: 'bar', dry: 'dry', 'dry storage': 'dry',
+}
+
 const money = (n: number) => `$${n.toFixed(2)}`
+
+const EXPORT_HEADERS = [
+  'Name', 'Category', 'Subcategory', 'Unit',
+  'Units per Box', 'Box Price', 'Min Stock', 'Price per Unit', 'Value',
+]
 
 function sortValue(item: ItemDoc, key: SortKey): number | string {
   switch (key) {
@@ -53,11 +64,14 @@ interface Props {
 }
 
 export default function PricesTable({ items, onRefresh }: Props) {
+  const { showToast } = useToast()
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<Category | null>(null)
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [editItem, setEditItem] = useState<ItemDoc | null>(null)
+  const [importing, setImporting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const filtered = useMemo(() => {
     let list = items
@@ -88,9 +102,134 @@ export default function PricesTable({ items, onRefresh }: Props) {
     }
   }
 
+  function handleExport() {
+    const rows: (string | number)[][] = [EXPORT_HEADERS]
+    for (const item of sorted) {
+      const perUnit = pricePerUnit(item)
+      rows.push([
+        item.name,
+        categoryLabels[item.category],
+        item.subcategory ?? '',
+        item.unit,
+        item.unitsPerBox ?? '',
+        item.boxPrice ?? '',
+        item.minStock ?? '',
+        perUnit ?? '',
+        lineValue(item),
+      ])
+    }
+    const blob = new Blob([toCSV(rows)], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `prices-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function handleImportClick() {
+    fileInputRef.current?.click()
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    const text = await file.text()
+    const table = parseCSV(text)
+    if (table.length < 2) {
+      showToast('That file has no data rows to import.', 'error')
+      return
+    }
+
+    const header = table[0].map((h) => h.trim().toLowerCase())
+    const idx = {
+      name: header.indexOf('name'),
+      category: header.indexOf('category'),
+      unitsPerBox: header.indexOf('units per box'),
+      boxPrice: header.indexOf('box price'),
+      minStock: header.indexOf('min stock'),
+    }
+    if (idx.name === -1 || idx.category === -1) {
+      showToast('CSV must include "Name" and "Category" columns.', 'error')
+      return
+    }
+
+    const toNumberOrNull = (raw?: string) => {
+      const trimmed = raw?.trim()
+      if (!trimmed) return null
+      const n = parseFloat(trimmed)
+      return isNaN(n) ? null : n
+    }
+
+    const rows = table.slice(1)
+      .filter((r) => r[idx.name]?.trim())
+      .map((r) => ({
+        name: r[idx.name].trim(),
+        category: labelToCategory[r[idx.category]?.trim().toLowerCase()],
+        unitsPerBox: idx.unitsPerBox !== -1 ? toNumberOrNull(r[idx.unitsPerBox]) : null,
+        boxPrice: idx.boxPrice !== -1 ? toNumberOrNull(r[idx.boxPrice]) : null,
+        minStock: idx.minStock !== -1 ? toNumberOrNull(r[idx.minStock]) : null,
+      }))
+      .filter((r) => r.category)
+
+    if (rows.length === 0) {
+      showToast('No valid rows found — check the Category column matches Cooler/Bar/Dry Storage.', 'error')
+      return
+    }
+
+    if (!confirm(`Import will update pricing for up to ${rows.length} item(s). Continue?`)) return
+
+    setImporting(true)
+    try {
+      const res = await fetch('/api/items/bulk-price-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows }),
+      })
+      if (!res.ok) throw new Error('Import failed')
+      const result: { updated: number; skipped: string[] } = await res.json()
+      showToast(
+        result.skipped.length > 0
+          ? `Updated ${result.updated} item(s), skipped ${result.skipped.length} not found`
+          : `Updated ${result.updated} item(s)`
+      )
+      onRefresh()
+    } catch {
+      showToast('Import failed — check your connection and try again.', 'error')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-forest mb-4">Prices</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="font-display text-2xl font-bold text-forest">Prices</h1>
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <button
+            onClick={handleImportClick}
+            disabled={importing}
+            className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold shadow-sm hover:bg-gray-50 disabled:opacity-40 transition active:scale-[0.98]"
+          >
+            {importing ? 'Importing…' : 'Import CSV'}
+          </button>
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 bg-forest hover:bg-forest-600 text-white rounded-xl text-sm font-semibold shadow-sm transition active:scale-[0.98]"
+          >
+            Export CSV
+          </button>
+        </div>
+      </div>
 
       <div className="flex items-center gap-2 mb-4">
         <div className="relative flex-1">

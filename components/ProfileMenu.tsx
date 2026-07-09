@@ -66,8 +66,8 @@ export default function ProfileMenu() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={handleClose}>
-          <div className="bg-white w-full rounded-t-3xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-backdrop-in" onClick={handleClose}>
+          <div className="bg-white w-full rounded-t-3xl animate-sheet-up" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mt-3" />
 
             {view === 'menu' && (
@@ -140,7 +140,7 @@ export default function ProfileMenu() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition-colors mt-1"
+                    className="bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition active:scale-[0.98] mt-1"
                   >
                     {saving ? 'Saving…' : 'Update Password'}
                   </button>

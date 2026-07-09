@@ -26,8 +26,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans:    ["var(--font-dm-sans)", "sans-serif"],
-        display: ["var(--font-playfair)", "serif"],
+        sans:    ["var(--font-inter)", "sans-serif"],
+        display: ["var(--font-inter)", "sans-serif"],
       },
     },
   },

@@ -7,6 +7,11 @@ import AddItemModal from './AddItemModal'
 import EditItemModal from './EditItemModal'
 import type { ItemDoc, Category, AlcoholType } from '@/types'
 import { itemQuantity } from '@/lib/itemCalc'
+import {
+  detectSizes, detectMaterial, detectType,
+  DRY_SIZES, DRY_MATERIALS, DRY_TYPES,
+  type DryMaterial, type DryType,
+} from '@/lib/dryStorageFilters'
 
 type SortKey = 'name' | 'quantity'
 
@@ -57,6 +62,9 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
   const [note, setNote] = useState('')
   const [search, setSearch] = useState('')
   const [subcategoryFilter, setSubcategoryFilter] = useState<AlcoholType | null>(null)
+  const [sizeFilter, setSizeFilter] = useState<number | null>(null)
+  const [materialFilter, setMaterialFilter] = useState<DryMaterial | null>(null)
+  const [typeFilter, setTypeFilter] = useState<DryType | null>(null)
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [showChangedOnly, setShowChangedOnly] = useState(false)
@@ -71,9 +79,18 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
     ? afterSearch.filter((i) => i.subcategory === subcategoryFilter)
     : afterSearch
 
-  const filtered = session && showChangedOnly
-    ? afterSubcategory.filter((i) => session.changes.has(i._id))
+  const afterDryFilters = category === 'dry'
+    ? afterSubcategory.filter((i) => {
+        if (sizeFilter !== null && !detectSizes(i.name).includes(sizeFilter)) return false
+        if (materialFilter && detectMaterial(i.name) !== materialFilter) return false
+        if (typeFilter && detectType(i.name) !== typeFilter) return false
+        return true
+      })
     : afterSubcategory
+
+  const filtered = session && showChangedOnly
+    ? afterDryFilters.filter((i) => session.changes.has(i._id))
+    : afterDryFilters
 
   const sorted = useMemo(() => {
     const list = [...filtered]
@@ -140,7 +157,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
           {session && (
             <button
               onClick={() => setShowAdd(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-forest hover:bg-forest-600 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-forest hover:bg-forest-600 text-white rounded-xl text-sm font-semibold shadow-sm transition active:scale-[0.98]"
             >
               <span className="text-base leading-none">+</span>
               Add Item
@@ -149,7 +166,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
           {!session && (
             <button
               onClick={() => setShowStartUpdate(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-crimson hover:bg-crimson-700 text-white rounded-xl text-sm font-semibold shadow-sm transition active:scale-[0.98]"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
@@ -163,8 +180,8 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
 
       {/* Update modal */}
       {showStartUpdate && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowStartUpdate(false)}>
-          <div className="bg-white w-full rounded-t-3xl p-6 pb-8" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-backdrop-in" onClick={() => setShowStartUpdate(false)}>
+          <div className="bg-white w-full rounded-t-3xl p-6 pb-8 animate-sheet-up" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
             <h2 className="font-display text-xl font-bold text-forest mb-4">Update Inventory</h2>
             <div className="flex gap-3 mb-4">
@@ -192,7 +209,7 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
             <button
               onClick={handleStartUpdate}
               disabled={!note.trim()}
-              className="w-full bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition-colors"
+              className="w-full bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition active:scale-[0.98]"
             >
               Continue
             </button>
@@ -262,6 +279,80 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         </div>
       )}
 
+      {/* Dry storage filters: size, material, type */}
+      {category === 'dry' && (
+        <div className="flex flex-col gap-2 mb-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-16 shrink-0">Size</span>
+            <button
+              onClick={() => setSizeFilter(null)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                sizeFilter === null ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
+              }`}
+            >
+              All
+            </button>
+            {DRY_SIZES.map((size) => (
+              <button
+                key={size}
+                onClick={() => setSizeFilter(sizeFilter === size ? null : size)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                  sizeFilter === size ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
+                }`}
+              >
+                {size} oz
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-16 shrink-0">Material</span>
+            <button
+              onClick={() => setMaterialFilter(null)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                materialFilter === null ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
+              }`}
+            >
+              All
+            </button>
+            {DRY_MATERIALS.map((material) => (
+              <button
+                key={material}
+                onClick={() => setMaterialFilter(materialFilter === material ? null : material)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                  materialFilter === material ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
+                }`}
+              >
+                {material}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-16 shrink-0">Type</span>
+            <button
+              onClick={() => setTypeFilter(null)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                typeFilter === null ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
+              }`}
+            >
+              All
+            </button>
+            {DRY_TYPES.map((type) => (
+              <button
+                key={type}
+                onClick={() => setTypeFilter(typeFilter === type ? null : type)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                  typeFilter === type ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Item table */}
       {!session && items.length === 0 ? (
         <div className="text-center py-16">
@@ -270,7 +361,11 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-center text-gray-400 py-10">
-          {session && showChangedOnly ? 'No changes recorded yet.' : `No items match "${search}"`}
+          {session && showChangedOnly
+            ? 'No changes recorded yet.'
+            : search.trim()
+              ? `No items match "${search}"`
+              : 'No items match the selected filters.'}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">

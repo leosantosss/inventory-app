@@ -136,7 +136,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
+    <div className="animate-fade-in">
       <h1 className="font-display text-2xl font-bold text-forest mb-4">Dashboard</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">

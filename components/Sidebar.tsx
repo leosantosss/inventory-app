@@ -177,9 +177,9 @@ export default function Sidebar() {
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex" onClick={closeMobile}>
-          <div className="bg-black/50 absolute inset-0" />
+          <div className="bg-black/50 absolute inset-0 animate-backdrop-in" />
           <div
-            className="relative bg-forest w-64 h-full flex flex-col shadow-xl"
+            className="relative bg-forest w-64 h-full flex flex-col shadow-xl animate-drawer-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between h-14 px-4">

@@ -48,10 +48,12 @@ export default function CategoryPage() {
   }
 
   return (
-    <ItemTable
-      items={items}
-      category={category as Category}
-      onRefresh={loadItems}
-    />
+    <div className="animate-fade-in">
+      <ItemTable
+        items={items}
+        category={category as Category}
+        onRefresh={loadItems}
+      />
+    </div>
   )
 }

@@ -67,8 +67,8 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={onClose}>
-      <div className="bg-white w-full rounded-t-3xl pb-8" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 flex items-end z-50 animate-backdrop-in" onClick={onClose}>
+      <div className="bg-white w-full rounded-t-3xl pb-8 animate-sheet-up" onClick={(e) => e.stopPropagation()}>
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mt-3 mb-5" />
         <div className="px-6">
           <h2 className="font-display text-xl font-bold text-forest mb-4">Edit Item</h2>
@@ -159,7 +159,7 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
             <button
               type="submit"
               disabled={!name.trim() || saving}
-              className="bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition-colors"
+              className="bg-forest hover:bg-forest-600 text-white rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition active:scale-[0.98]"
             >
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
@@ -167,7 +167,7 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-crimson-50 hover:bg-crimson-100 text-crimson rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition-colors"
+              className="bg-crimson-50 hover:bg-crimson-100 text-crimson rounded-xl py-3.5 text-base font-semibold disabled:opacity-40 transition active:scale-[0.98]"
             >
               {deleting ? 'Deleting…' : 'Delete Item'}
             </button>

@@ -2,6 +2,8 @@ export type Category = 'cooler' | 'dry' | 'bar'
 export type Unit = 'count' | 'lbs'
 export type Direction = 'in' | 'out'
 export type AlcoholType = 'tequila' | 'vodka' | 'whiskey' | 'rum' | 'mini tequila' | 'gin' | 'cognac' | 'brandy' | 'wine' | 'liqueur' | 'other'
+export type PriceField = 'unitsPerBox' | 'boxPrice' | 'minStock'
+export type PriceChangeSource = 'manual' | 'csv-import'
 
 export interface ItemDoc {
   _id: string
@@ -43,4 +45,22 @@ export interface HistoryEntry {
 export interface ChangeEntry {
   itemId: string
   newValue: number
+}
+
+export interface PriceChange {
+  field: PriceField
+  oldValue: number | null
+  newValue: number | null
+}
+
+export interface PriceLogEntry {
+  _id: string
+  itemId: string
+  itemName: string
+  category: Category
+  userId: string
+  displayName: string
+  source: PriceChangeSource
+  changes: PriceChange[]
+  createdAt: string
 }

@@ -9,7 +9,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { id } = await params
   const body = await request.json()
-  const item = await updateItemMetadata(id, body)
+  const item = await updateItemMetadata(id, body, {
+    userId: (session.user as { id?: string }).id ?? '',
+    displayName: session.user?.name ?? 'Unknown',
+    source: 'manual',
+  })
   if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(item)
 }

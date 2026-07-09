@@ -26,5 +26,9 @@ export default function PricesPage() {
     return <TableSkeleton />
   }
 
-  return <PricesTable items={items} onRefresh={loadItems} />
+  return (
+    <div className="animate-fade-in">
+      <PricesTable items={items} onRefresh={loadItems} />
+    </div>
+  )
 }

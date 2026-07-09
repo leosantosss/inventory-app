@@ -41,14 +41,14 @@ export default function UpdateSessionBanner() {
         <div className="flex gap-2 shrink-0">
           <button
             onClick={cancelSession}
-            className="px-3 py-2 rounded-xl text-sm font-semibold bg-white/15 hover:bg-white/25 transition-colors"
+            className="px-3 py-2 rounded-xl text-sm font-semibold bg-white/15 hover:bg-white/25 transition active:scale-[0.98]"
           >
             Cancel
           </button>
           <button
             onClick={submitSession}
             disabled={isSubmitting || totalCount === 0}
-            className="px-3 py-2 rounded-xl text-sm font-semibold bg-crimson hover:bg-crimson-700 disabled:opacity-40 transition-colors"
+            className="px-3 py-2 rounded-xl text-sm font-semibold bg-crimson hover:bg-crimson-700 disabled:opacity-40 transition active:scale-[0.98]"
           >
             {isSubmitting ? 'Saving…' : 'Submit'}
           </button>
