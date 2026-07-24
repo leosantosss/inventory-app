@@ -3,5 +3,5 @@ import { withAuth } from 'next-auth/middleware'
 export default withAuth({ pages: { signIn: '/login' } })
 
 export const config = {
-  matcher: ['/((?!login|api/auth|_next/static|_next/image|favicon.ico|icons|manifest.json).*)'],
+  matcher: ['/((?!login|api/auth|_next/static|_next/image|favicon.ico|icons|manifest.json|logo.png|icon.png|apple-icon.png).*)'],
 }

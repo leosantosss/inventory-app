@@ -33,9 +33,8 @@ export default function InventoryLayout({ children }: { children: React.ReactNod
             <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <HamburgerButton />
-                <span className="font-display text-gray-900 text-lg font-bold tracking-widest uppercase">
-                  Inventory
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="Chycho's" className="md:hidden h-8 w-auto" />
               </div>
               <ProfileMenu />
             </header>

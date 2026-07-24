@@ -68,11 +68,8 @@ function CollapseIcon({ collapsed }: { collapsed: boolean }) {
 }
 
 function Logo() {
-  return (
-    <div className="w-7 h-7 rounded-lg bg-forest flex items-center justify-center text-white font-bold text-xs shrink-0">
-      C
-    </div>
-  )
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/logo.png" alt="Chycho's" className="w-9 h-9 rounded-lg object-contain shrink-0 bg-white" />
 }
 
 function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onNavigate?: () => void; counts: Record<Category, number> | null }) {
@@ -178,7 +175,7 @@ export default function Sidebar() {
           {!collapsed && (
             <div className="flex items-center gap-2 min-w-0">
               <Logo />
-              <span className="font-display text-gray-900 text-base font-bold tracking-widest uppercase truncate">Chychos</span>
+              <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho's</span>
             </div>
           )}
           <button
@@ -203,7 +200,7 @@ export default function Sidebar() {
             <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100">
               <div className="flex items-center gap-2 min-w-0">
                 <Logo />
-                <span className="font-display text-gray-900 text-base font-bold tracking-widest uppercase truncate">Chychos</span>
+                <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho's</span>
               </div>
               <button
                 onClick={closeMobile}
