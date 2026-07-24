@@ -29,11 +29,11 @@ export default function ItemRow({ item, onEdit, sessionMode, changeInfo, onQuick
   return (
     <tr
       onClick={sessionMode ? onQuickUpdate : undefined}
-      className={`${changed ? 'bg-forest-100' : low ? 'bg-crimson-50' : 'odd:bg-white even:bg-gray-50'} ${
-        sessionMode ? 'cursor-pointer hover:bg-forest-50' : ''
+      className={`${changed ? 'bg-forest-100' : low ? 'bg-crimson-50' : 'bg-white'} ${
+        sessionMode ? 'cursor-pointer hover:bg-forest-50' : 'hover:bg-gray-50'
       }`}
     >
-      <td className="px-4 py-2.5 text-sm font-medium text-gray-800 border-r border-gray-200">
+      <td className="px-4 py-3 text-sm font-medium text-gray-800">
         <div className="flex flex-col">
           <span>{item.name}</span>
           {item.subcategory && (
@@ -41,8 +41,8 @@ export default function ItemRow({ item, onEdit, sessionMode, changeInfo, onQuick
           )}
         </div>
       </td>
-      <td className="px-4 py-2.5 text-sm text-gray-500 border-r border-gray-200">{categoryLabels[item.category]}</td>
-      <td className="px-4 py-2.5 text-sm text-right border-r border-gray-200">
+      <td className="px-4 py-3 text-sm text-gray-500">{categoryLabels[item.category]}</td>
+      <td className="px-4 py-3 text-sm text-right">
         {sessionMode ? (
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-sm font-semibold tabular-nums transition-colors ${
@@ -68,8 +68,8 @@ export default function ItemRow({ item, onEdit, sessionMode, changeInfo, onQuick
           </>
         )}
       </td>
-      <td className="px-4 py-2.5 text-sm text-gray-500 border-r border-gray-200">{unitLabel}</td>
-      <td className="px-2 py-2.5 text-right">
+      <td className="px-4 py-3 text-sm text-gray-500">{unitLabel}</td>
+      <td className="px-2 py-3 text-right">
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(item) }}
           className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-gray-300 hover:text-forest hover:bg-forest-50 transition-colors"

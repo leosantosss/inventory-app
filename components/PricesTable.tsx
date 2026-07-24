@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useRef } from 'react'
+import { Fragment, useState, useMemo, useRef } from 'react'
 import EditItemModal from './EditItemModal'
 import type { ItemDoc, Category } from '@/types'
 import { pricePerUnit, lineValue } from '@/lib/itemCalc'
@@ -35,6 +35,8 @@ const categoryFilters: { label: string; value: Category | null }[] = [
   { label: 'Bar', value: 'bar' },
   { label: 'Dry Storage', value: 'dry' },
 ]
+
+const CATEGORY_ORDER: Category[] = ['cooler', 'bar', 'dry']
 
 const labelToCategory: Record<string, Category> = {
   cooler: 'cooler', bar: 'bar', dry: 'dry', 'dry storage': 'dry',
@@ -93,6 +95,13 @@ export default function PricesTable({ items, onRefresh }: Props) {
 
   const totalValue = useMemo(() => filtered.reduce((sum, i) => sum + lineValue(i), 0), [filtered])
 
+  const groups = useMemo(() => {
+    if (categoryFilter) return null
+    return CATEGORY_ORDER
+      .map((cat) => ({ category: cat, items: sorted.filter((i) => i.category === cat) }))
+      .filter((g) => g.items.length > 0)
+  }, [sorted, categoryFilter])
+
   function handleSort(key: SortKey) {
     if (key === sortKey) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
@@ -129,6 +138,46 @@ export default function PricesTable({ items, onRefresh }: Props) {
 
   function handleImportClick() {
     fileInputRef.current?.click()
+  }
+
+  function renderRow(item: ItemDoc) {
+    const perUnit = pricePerUnit(item)
+    const value = lineValue(item)
+    return (
+      <tr key={item._id} className="bg-white hover:bg-gray-50">
+        <td className="px-4 py-3 text-sm font-medium text-gray-800">
+          <div className="flex flex-col">
+            <span>{item.name}</span>
+            {item.subcategory && (
+              <span className="text-[11px] text-forest-400 capitalize font-normal">{item.subcategory}</span>
+            )}
+          </div>
+        </td>
+        <td className="px-4 py-3 text-sm text-gray-500">{categoryLabels[item.category]}</td>
+        <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">{item.unitsPerBox ?? '—'}</td>
+        <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">
+          {item.boxPrice != null ? money(item.boxPrice) : '—'}
+        </td>
+        <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">
+          {perUnit != null ? money(perUnit) : '—'}
+        </td>
+        <td className="px-4 py-3 text-sm text-right tabular-nums font-semibold text-forest">
+          {value > 0 ? money(value) : '—'}
+        </td>
+        <td className="px-2 py-3 text-right">
+          <button
+            onClick={() => setEditItem(item)}
+            className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-gray-300 hover:text-forest hover:bg-forest-50 transition-colors"
+            aria-label={`Edit ${item.name}`}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
+        </td>
+      </tr>
+    )
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -268,12 +317,12 @@ export default function PricesTable({ items, onRefresh }: Props) {
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-100 border-b border-gray-200">
+              <tr className="border-b border-gray-200">
                 {columns.map((col) => (
                   <th
                     key={col.sortKey}
                     onClick={() => handleSort(col.sortKey)}
-                    className={`px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-r border-gray-200 whitespace-nowrap cursor-pointer select-none hover:text-forest ${
+                    className={`px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:text-forest ${
                       col.align === 'right' ? 'text-right' : 'text-left'
                     }`}
                   >
@@ -283,63 +332,32 @@ export default function PricesTable({ items, onRefresh }: Props) {
                     )}
                   </th>
                 ))}
-                <th className="px-2 py-2 border-gray-200" />
+                <th className="px-2 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {sorted.map((item, i) => {
-                const perUnit = pricePerUnit(item)
-                const value = lineValue(item)
-                return (
-                  <tr key={item._id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-4 py-2.5 text-sm font-medium text-gray-800 border-r border-gray-200">
-                      <div className="flex flex-col">
-                        <span>{item.name}</span>
-                        {item.subcategory && (
-                          <span className="text-[11px] text-forest-400 capitalize font-normal">{item.subcategory}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-gray-500 border-r border-gray-200">
-                      {categoryLabels[item.category]}
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-right tabular-nums text-gray-500 border-r border-gray-200">
-                      {item.unitsPerBox ?? '—'}
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-right tabular-nums text-gray-500 border-r border-gray-200">
-                      {item.boxPrice != null ? money(item.boxPrice) : '—'}
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-right tabular-nums text-gray-500 border-r border-gray-200">
-                      {perUnit != null ? money(perUnit) : '—'}
-                    </td>
-                    <td className="px-4 py-2.5 text-sm text-right tabular-nums font-semibold text-forest border-r border-gray-200">
-                      {value > 0 ? money(value) : '—'}
-                    </td>
-                    <td className="px-2 py-2.5 text-right">
-                      <button
-                        onClick={() => setEditItem(item)}
-                        className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-gray-300 hover:text-forest hover:bg-forest-50 transition-colors"
-                        aria-label={`Edit ${item.name}`}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
+              {groups
+                ? groups.map((group) => (
+                    <Fragment key={group.category}>
+                      <tr>
+                        <td colSpan={columns.length + 1} className="bg-forest text-white text-xs font-bold uppercase tracking-wide px-4 py-2">
+                          {categoryLabels[group.category]} ({group.items.length})
+                        </td>
+                      </tr>
+                      {group.items.map((item) => renderRow(item))}
+                    </Fragment>
+                  ))
+                : sorted.map((item) => renderRow(item))}
             </tbody>
             <tfoot>
               <tr className="bg-gray-100 border-t-2 border-gray-200 font-semibold">
-                <td colSpan={5} className="px-4 py-2.5 text-sm text-right text-gray-600 border-r border-gray-200">
+                <td colSpan={5} className="px-4 py-3 text-sm text-right text-gray-600">
                   Total Value
                 </td>
-                <td className="px-4 py-2.5 text-sm text-right tabular-nums text-forest border-r border-gray-200">
+                <td className="px-4 py-3 text-sm text-right tabular-nums text-forest">
                   {money(totalValue)}
                 </td>
-                <td className="px-2 py-2.5" />
+                <td className="px-2 py-3" />
               </tr>
             </tfoot>
           </table>

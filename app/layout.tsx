@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { IBM_Plex_Sans } from 'next/font/google'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import SessionWrapper from '@/components/SessionWrapper'
 import './globals.css'
 
-const inter = Inter({
+const plexSans = IBM_Plex_Sans({
   subsets: ['latin'],
-  variable: '--font-inter',
-  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-plex-sans',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className={`${inter.variable} font-sans`}>
+      <body className={`${plexSans.variable} font-sans`}>
         <SessionWrapper session={session}>{children}</SessionWrapper>
       </body>
     </html>

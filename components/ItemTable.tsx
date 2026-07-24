@@ -5,6 +5,7 @@ import ItemRow from './ItemRow'
 import QuickUpdateModal from './QuickUpdateModal'
 import AddItemModal from './AddItemModal'
 import EditItemModal from './EditItemModal'
+import FilterDropdown from './FilterDropdown'
 import type { ItemDoc, Category, AlcoholType } from '@/types'
 import { itemQuantity } from '@/lib/itemCalc'
 import {
@@ -250,106 +251,39 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         )}
       </div>
 
-      {/* Alcohol type filter chips (bar only) */}
+      {/* Alcohol type filter (bar only) */}
       {category === 'bar' && (
         <div className="flex gap-2 flex-wrap mb-4">
-          <button
-            onClick={() => setSubcategoryFilter(null)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-              subcategoryFilter === null
-                ? 'bg-forest text-white'
-                : 'bg-white text-gray-500 border border-gray-200'
-            }`}
-          >
-            All
-          </button>
-          {alcoholTypes.map((type) => (
-            <button
-              key={type}
-              onClick={() => setSubcategoryFilter(subcategoryFilter === type ? null : type)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-colors ${
-                subcategoryFilter === type
-                  ? 'bg-forest text-white'
-                  : 'bg-white text-gray-500 border border-gray-200'
-              }`}
-            >
-              {type}
-            </button>
-          ))}
+          <FilterDropdown
+            label="Type"
+            options={alcoholTypes.map((type) => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1) }))}
+            selected={subcategoryFilter}
+            onChange={setSubcategoryFilter}
+          />
         </div>
       )}
 
       {/* Dry storage filters: size, material, type */}
       {category === 'dry' && (
-        <div className="flex flex-col gap-2 mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-16 shrink-0">Size</span>
-            <button
-              onClick={() => setSizeFilter(null)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                sizeFilter === null ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
-              }`}
-            >
-              All
-            </button>
-            {DRY_SIZES.map((size) => (
-              <button
-                key={size}
-                onClick={() => setSizeFilter(sizeFilter === size ? null : size)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                  sizeFilter === size ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
-                }`}
-              >
-                {size} oz
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-16 shrink-0">Material</span>
-            <button
-              onClick={() => setMaterialFilter(null)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                materialFilter === null ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
-              }`}
-            >
-              All
-            </button>
-            {DRY_MATERIALS.map((material) => (
-              <button
-                key={material}
-                onClick={() => setMaterialFilter(materialFilter === material ? null : material)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                  materialFilter === material ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
-                }`}
-              >
-                {material}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-16 shrink-0">Type</span>
-            <button
-              onClick={() => setTypeFilter(null)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                typeFilter === null ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
-              }`}
-            >
-              All
-            </button>
-            {DRY_TYPES.map((type) => (
-              <button
-                key={type}
-                onClick={() => setTypeFilter(typeFilter === type ? null : type)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                  typeFilter === type ? 'bg-forest text-white' : 'bg-white text-gray-500 border border-gray-200'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+        <div className="flex gap-2 flex-wrap mb-4">
+          <FilterDropdown
+            label="Size"
+            options={DRY_SIZES.map((size) => ({ value: size, label: `${size} oz` }))}
+            selected={sizeFilter}
+            onChange={setSizeFilter}
+          />
+          <FilterDropdown
+            label="Material"
+            options={DRY_MATERIALS.map((material) => ({ value: material, label: material }))}
+            selected={materialFilter}
+            onChange={setMaterialFilter}
+          />
+          <FilterDropdown
+            label="Type"
+            options={DRY_TYPES.map((type) => ({ value: type, label: type }))}
+            selected={typeFilter}
+            onChange={setTypeFilter}
+          />
         </div>
       )}
 
@@ -371,12 +305,12 @@ export default function ItemTable({ items, category, onRefresh }: Props) {
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-100 border-b border-gray-200">
+              <tr className="border-b border-gray-200">
                 {columns.map((col) => (
                   <th
                     key={col.label || 'actions'}
                     onClick={col.sortKey ? () => handleSort(col.sortKey!) : undefined}
-                    className={`px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-r border-gray-200 last:border-r-0 whitespace-nowrap ${
+                    className={`px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap ${
                       col.align === 'right' ? 'text-right' : 'text-left'
                     } ${col.sortKey ? 'cursor-pointer select-none hover:text-forest' : ''}`}
                   >

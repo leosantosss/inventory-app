@@ -1,9 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSidebar } from '@/context/SidebarContext'
-import type { Category } from '@/types'
+import type { Category, ItemDoc } from '@/types'
 
 const inventoryLinks: { label: string; category: Category }[] = [
   { label: 'Cooler', category: 'cooler' },
@@ -67,30 +67,42 @@ function CollapseIcon({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-function NavContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+function Logo() {
+  return (
+    <div className="w-7 h-7 rounded-lg bg-forest flex items-center justify-center text-white font-bold text-xs shrink-0">
+      C
+    </div>
+  )
+}
+
+function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onNavigate?: () => void; counts: Record<Category, number> | null }) {
   const pathname = usePathname()
-  const [inventoryOpen, setInventoryOpen] = useState(pathname.startsWith('/inventory/cooler') || pathname.startsWith('/inventory/bar') || pathname.startsWith('/inventory/dry'))
+  const inventoryActive = pathname.startsWith('/inventory/cooler') || pathname.startsWith('/inventory/bar') || pathname.startsWith('/inventory/dry')
+  const [inventoryOpen, setInventoryOpen] = useState(inventoryActive)
 
   const dashboardActive = pathname.startsWith('/inventory/dashboard')
   const pricesActive = pathname.startsWith('/inventory/prices')
   const historyActive = pathname.startsWith('/inventory/history')
 
+  const linkClass = (active: boolean) =>
+    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors border-l-2 ${
+      active
+        ? 'bg-crimson-50 text-crimson-800 border-crimson'
+        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 border-transparent'
+    }`
+
   return (
     <nav className="flex-1 px-2 py-3 flex flex-col gap-1 overflow-y-auto">
-      <Link
-        href="/inventory/dashboard"
-        onClick={onNavigate}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-          dashboardActive ? 'bg-white/15 text-white border-l-2 border-crimson' : 'text-white/70 hover:bg-white/10 hover:text-white border-l-2 border-transparent'
-        }`}
-      >
+      <Link href="/inventory/dashboard" onClick={onNavigate} className={linkClass(dashboardActive)}>
         <DashboardIcon />
         {!collapsed && <span>Dashboard</span>}
       </Link>
 
       <button
         onClick={() => setInventoryOpen((v) => !v)}
-        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+          inventoryActive ? 'text-crimson-800' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+        }`}
       >
         <InventoryIcon />
         {!collapsed && (
@@ -102,7 +114,7 @@ function NavContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
       </button>
 
       {inventoryOpen && !collapsed && (
-        <div className="ml-6 flex flex-col gap-0.5 border-l border-white/10 pl-3">
+        <div className="ml-6 flex flex-col gap-0.5 border-l border-gray-200 pl-3">
           {inventoryLinks.map((link) => {
             const href = `/inventory/${link.category}`
             const active = pathname.startsWith(href)
@@ -111,35 +123,24 @@ function NavContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
                 key={link.category}
                 href={href}
                 onClick={onNavigate}
-                className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                  active ? 'bg-white/15 text-white font-semibold' : 'text-white/60 hover:bg-white/10 hover:text-white'
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                  active ? 'bg-crimson-50 text-crimson-800 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {counts && <span className="text-xs text-gray-400">{counts[link.category]}</span>}
               </Link>
             )
           })}
         </div>
       )}
 
-      <Link
-        href="/inventory/prices"
-        onClick={onNavigate}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-          pricesActive ? 'bg-white/15 text-white border-l-2 border-crimson' : 'text-white/70 hover:bg-white/10 hover:text-white border-l-2 border-transparent'
-        }`}
-      >
+      <Link href="/inventory/prices" onClick={onNavigate} className={linkClass(pricesActive)}>
         <PricesIcon />
         {!collapsed && <span>Prices</span>}
       </Link>
 
-      <Link
-        href="/inventory/history"
-        onClick={onNavigate}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-          historyActive ? 'bg-white/15 text-white border-l-2 border-crimson' : 'text-white/70 hover:bg-white/10 hover:text-white border-l-2 border-transparent'
-        }`}
-      >
+      <Link href="/inventory/history" onClick={onNavigate} className={linkClass(historyActive)}>
         <HistoryIcon />
         {!collapsed && <span>History</span>}
       </Link>
@@ -150,28 +151,45 @@ function NavContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?
 export default function Sidebar() {
   const { mobileOpen, closeMobile } = useSidebar()
   const [collapsed, setCollapsed] = useState(false)
+  const [counts, setCounts] = useState<Record<Category, number> | null>(null)
+
+  useEffect(() => {
+    fetch('/api/items')
+      .then((res) => res.json())
+      .then((items: ItemDoc[]) => {
+        setCounts({
+          cooler: items.filter((i) => i.category === 'cooler').length,
+          bar: items.filter((i) => i.category === 'bar').length,
+          dry: items.filter((i) => i.category === 'dry').length,
+        })
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <>
       {/* Desktop rail */}
       <aside
-        className={`hidden md:flex flex-col bg-forest sticky top-0 h-screen shrink-0 transition-all duration-200 ${
+        className={`hidden md:flex flex-col bg-white border-r border-gray-200 sticky top-0 h-screen shrink-0 transition-all duration-200 ${
           collapsed ? 'w-16' : 'w-56'
         }`}
       >
-        <div className={`flex items-center h-14 px-4 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        <div className={`flex items-center h-14 px-4 border-b border-gray-100 ${collapsed ? 'justify-center' : 'justify-between'}`}>
           {!collapsed && (
-            <span className="font-display text-white text-base font-bold tracking-widest uppercase">Chychos</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <Logo />
+              <span className="font-display text-gray-900 text-base font-bold tracking-widest uppercase truncate">Chychos</span>
+            </div>
           )}
           <button
             onClick={() => setCollapsed((v) => !v)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <CollapseIcon collapsed={collapsed} />
           </button>
         </div>
-        <NavContent collapsed={collapsed} />
+        <NavContent collapsed={collapsed} counts={counts} />
       </aside>
 
       {/* Mobile drawer */}
@@ -179,14 +197,17 @@ export default function Sidebar() {
         <div className="md:hidden fixed inset-0 z-50 flex" onClick={closeMobile}>
           <div className="bg-black/50 absolute inset-0 animate-backdrop-in" />
           <div
-            className="relative bg-forest w-64 h-full flex flex-col shadow-xl animate-drawer-in"
+            className="relative bg-white w-64 h-full flex flex-col shadow-xl animate-drawer-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between h-14 px-4">
-              <span className="font-display text-white text-base font-bold tracking-widest uppercase">Chychos</span>
+            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100">
+              <div className="flex items-center gap-2 min-w-0">
+                <Logo />
+                <span className="font-display text-gray-900 text-base font-bold tracking-widest uppercase truncate">Chychos</span>
+              </div>
               <button
                 onClick={closeMobile}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
                 aria-label="Close menu"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -194,7 +215,7 @@ export default function Sidebar() {
                 </svg>
               </button>
             </div>
-            <NavContent collapsed={false} onNavigate={closeMobile} />
+            <NavContent collapsed={false} onNavigate={closeMobile} counts={counts} />
           </div>
         </div>
       )}

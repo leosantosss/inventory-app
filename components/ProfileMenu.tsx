@@ -59,7 +59,7 @@ export default function ProfileMenu() {
     <>
       <button
         onClick={handleOpen}
-        className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-base font-bold transition-colors"
+        className="w-9 h-9 rounded-full bg-forest hover:bg-forest-600 text-white flex items-center justify-center text-base font-bold transition-colors"
         aria-label="Profile"
       >
         {session?.user?.name?.[0]?.toUpperCase() ?? '?'}
