@@ -175,7 +175,7 @@ export default function Sidebar() {
           {!collapsed && (
             <div className="flex items-center gap-2 min-w-0">
               <Logo />
-              <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho's</span>
+              <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho&apos;s</span>
             </div>
           )}
           <button
@@ -200,7 +200,7 @@ export default function Sidebar() {
             <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100">
               <div className="flex items-center gap-2 min-w-0">
                 <Logo />
-                <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho's</span>
+                <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho&apos;s</span>
               </div>
               <button
                 onClick={closeMobile}
