@@ -64,3 +64,20 @@ export interface PriceLogEntry {
   changes: PriceChange[]
   createdAt: string
 }
+
+export interface InvoiceLineItem {
+  rawText: string
+  extractedName: string
+  quantity: number
+  unit: string | null
+  matchedItemId: string | null
+  matchedItemName: string | null
+  confidence: number
+  reasoning: string
+}
+
+export interface InvoiceExtractionResult {
+  vendorGuess: string | null
+  fileName: string
+  lineItems: InvoiceLineItem[]
+}

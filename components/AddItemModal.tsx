@@ -7,6 +7,8 @@ interface Props {
   category: Category
   onClose: () => void
   onSaved: (item: ItemDoc) => void
+  initialName?: string
+  initialStartingValue?: number
 }
 
 const unitLabels: Record<Unit, string> = { count: 'Count (units)', lbs: 'Pounds (lbs)' }
@@ -16,11 +18,11 @@ const alcoholTypes: AlcoholType[] = [
   'gin', 'cognac', 'brandy', 'wine', 'liqueur', 'other',
 ]
 
-export default function AddItemModal({ category, onClose, onSaved }: Props) {
+export default function AddItemModal({ category, onClose, onSaved, initialName, initialStartingValue }: Props) {
   const { showToast } = useToast()
-  const [name, setName] = useState('')
+  const [name, setName] = useState(initialName ?? '')
   const [unit, setUnit] = useState<Unit>('count')
-  const [startingValue, setStartingValue] = useState('0')
+  const [startingValue, setStartingValue] = useState(String(initialStartingValue ?? 0))
   const [subcategory, setSubcategory] = useState<AlcoholType | ''>('')
   const [unitsPerBox, setUnitsPerBox] = useState('')
   const [boxPrice, setBoxPrice] = useState('')

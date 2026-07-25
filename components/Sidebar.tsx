@@ -45,6 +45,14 @@ function HistoryIcon() {
   )
 }
 
+function ImportIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v12" /><path d="M7 8l5-5 5 5" /><path d="M5 21h14" />
+    </svg>
+  )
+}
+
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
@@ -80,6 +88,7 @@ function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onN
   const dashboardActive = pathname.startsWith('/inventory/dashboard')
   const pricesActive = pathname.startsWith('/inventory/prices')
   const historyActive = pathname.startsWith('/inventory/history')
+  const importActive = pathname.startsWith('/inventory/import')
 
   const linkClass = (active: boolean) =>
     `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors border-l-2 ${
@@ -131,6 +140,11 @@ function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onN
           })}
         </div>
       )}
+
+      <Link href="/inventory/import" onClick={onNavigate} className={linkClass(importActive)}>
+        <ImportIcon />
+        {!collapsed && <span>Import Invoice</span>}
+      </Link>
 
       <Link href="/inventory/prices" onClick={onNavigate} className={linkClass(pricesActive)}>
         <PricesIcon />
