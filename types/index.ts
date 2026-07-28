@@ -70,6 +70,9 @@ export interface InvoiceLineItem {
   extractedName: string
   quantity: number
   unit: string | null
+  isCaseQuantity: boolean
+  invoicePackSize: number | null
+  invoicePrice: number | null
   matchedItemId: string | null
   matchedItemName: string | null
   confidence: number

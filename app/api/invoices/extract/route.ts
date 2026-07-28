@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { getAllItems } from '@/lib/services/itemService'
 import { extractInvoiceLineItems, InvoiceExtractionError } from '@/lib/services/invoiceExtractionService'
 
-export const maxDuration = 60
+export const maxDuration = 300
 
 const MAX_FILE_BYTES = 15 * 1024 * 1024
 const ALLOWED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp'])

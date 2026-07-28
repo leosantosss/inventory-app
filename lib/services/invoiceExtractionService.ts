@@ -8,12 +8,15 @@ const TOOL_NAME = 'record_invoice_line_items'
 
 const SYSTEM_PROMPT = `You read restaurant delivery invoices (photos or PDFs) and extract line items to match against an existing inventory catalog. You do NOT do any case-to-unit conversion math yourself — you only report exactly what's printed on the invoice, and the app computes the final stock quantity afterward using the catalog's own case-size data for the matched item.
 
+Some documents are blank order guides instead of a completed invoice — a vendor's full catalog of orderable items, printed with empty boxes where a person would normally handwrite how many they want. Read those the same way, except quantity is usually blank across most or all lines: report every single line item printed on it as its own entry, with invoiceQuantity: null on each one that has nothing filled in. A blank order guide with 200 printed items must produce 200 lineItems entries, not zero — "nothing has been ordered yet" is not a reason to return an empty list. Do not summarize, sample, or skip items to save space, no matter how many pages or how repetitive the catalog is — enumerate every one. A separate "Pack" or "Case Pack" column on an order guide counts the same as a pack size stated in the item description.
+
 For every line item on the invoice:
 - Report the raw text as it appears and your best-read extracted name.
-- Report \`invoiceQuantity\`: the plain number printed on the invoice for this line (e.g. if the invoice says "2 CS", invoiceQuantity is 2 — the raw number only, never a conversion of it).
+- Report \`invoiceQuantity\`: the plain number printed on the invoice for this line (e.g. if the invoice says "2 CS", invoiceQuantity is 2 — the raw number only, never a conversion of it). If this line's quantity is genuinely blank — nothing handwritten or printed, as is normal on a blank order guide — report \`null\` instead of guessing.
 - Report \`invoiceUnit\`: the unit exactly as printed (e.g. "case", "cs", "bottle", "bag", "each", "ctn"), or null if none is shown.
 - Report \`isCaseQuantity\`: true if invoiceQuantity counts cases, boxes, cartons, or any other outer packaging that needs converting into the catalog's tracked unit — false if invoiceQuantity is already counting individual units the same way the catalog tracks that item (e.g. the invoice already lists a bottle count, or a bag count that matches how the catalog tracks that item). Invoices abbreviate this in many ways — "CS", "CTN", "BX", "case", "box", "/CS" after the item, or a quantity column literally labeled "Cases" or "Units Ordered" (as opposed to "Each") all mean isCaseQuantity is true. When in doubt about whether a number is a case count or an individual-unit count, look at the scale: a small number (1-10) next to a big, generic product name on a wholesale invoice is almost always a case count, not a literal handful of items.
 - Report \`invoicePackSize\`: if the invoice's own item description states how many individual units are packed in one case/box (e.g. "TOPO CHICO 12PK" → 12, "LIDS 6BG/CS" → 6, "24/CS", "CASE OF 4", "5LB WHEEL 2/CASE" → 2), report that number here. Otherwise null. Report this whenever the invoice states it — including for items with no catalog match at all, since a brand-new item has no catalog case size to fall back on and the invoice's own stated pack size is the only conversion data available. Read it directly from the invoice text; do not compute or guess it.
+- Report \`invoiceUnitPrice\`: the price for one unit of invoiceQuantity — i.e. price per case if isCaseQuantity is true, or price per each otherwise — read from a Price/Unit Price/Cost column. If the invoice only prints an extended/total price for the line (price × invoiceQuantity), divide it by invoiceQuantity to get the per-unit price. Null if no price appears for this line at all.
 - Match the line against the provided catalog using your judgment — vendor naming is often abbreviated, reordered, or in a different language than the catalog (e.g. "Bud Light 24pk Can" should match a catalog item literally named "Budlight"). Only report a match you're actually confident in; if nothing in the catalog is a plausible match, set matchedItemId and matchedItemName to null.
 - Give a confidence score from 0 to 1 reflecting how sure you are about the match (not about having read the line correctly).
 - Give a short one-sentence reasoning for the match (or lack of one) so a human reviewer can sanity-check it.
@@ -25,7 +28,9 @@ Report every line item you can find, even ones you can't match. Do not skip line
 const tool: Anthropic.Tool = {
   name: TOOL_NAME,
   description:
-    'Record every line item found on this invoice, matched against the provided item catalog. ' +
+    'Record every line item found on this invoice, matched against the provided item catalog. This includes blank ' +
+    'order guides with hundreds of items and no quantities filled in yet — never return an empty list for a ' +
+    'document that has line items printed on it. ' +
     'Report invoiceQuantity, invoiceUnit, and invoicePackSize exactly as printed on the invoice — do not convert case ' +
     'quantities yourself; the app converts them afterward, preferring the catalog\'s own unitsPerBox for the matched ' +
     'item and falling back to invoicePackSize only when the catalog has no case size on file.',
@@ -41,10 +46,11 @@ const tool: Anthropic.Tool = {
           properties: {
             rawText: { type: 'string' },
             extractedName: { type: 'string' },
-            invoiceQuantity: { type: 'number' },
+            invoiceQuantity: { type: ['number', 'null'] },
             invoiceUnit: { type: ['string', 'null'] },
             isCaseQuantity: { type: 'boolean' },
             invoicePackSize: { type: ['number', 'null'] },
+            invoiceUnitPrice: { type: ['number', 'null'] },
             matchedItemId: { type: ['string', 'null'] },
             matchedItemName: { type: ['string', 'null'] },
             confidence: { type: 'number' },
@@ -52,7 +58,7 @@ const tool: Anthropic.Tool = {
           },
           required: [
             'rawText', 'extractedName', 'invoiceQuantity', 'invoiceUnit', 'isCaseQuantity', 'invoicePackSize',
-            'matchedItemId', 'matchedItemName', 'confidence', 'reasoning',
+            'invoiceUnitPrice', 'matchedItemId', 'matchedItemName', 'confidence', 'reasoning',
           ],
           additionalProperties: false,
         },
@@ -66,10 +72,11 @@ const tool: Anthropic.Tool = {
 interface RawLineItem {
   rawText: string
   extractedName: string
-  invoiceQuantity: number
+  invoiceQuantity: number | null
   invoiceUnit: string | null
   isCaseQuantity: boolean
   invoicePackSize: number | null
+  invoiceUnitPrice: number | null
   matchedItemId: string | null
   matchedItemName: string | null
   confidence: number
@@ -130,7 +137,7 @@ export async function extractInvoiceLineItems(args: {
   try {
     const stream = anthropic.messages.stream({
       model: MODEL,
-      max_tokens: 16000,
+      max_tokens: 64000,
       thinking: { type: 'adaptive' },
       output_config: { effort: 'high' },
       tools: [tool],
@@ -184,14 +191,39 @@ export async function extractInvoiceLineItems(args: {
   const lineItems: InvoiceLineItem[] = parsed.lineItems.map((line) => {
     const rawId = line.matchedItemId?.trim() || null
     const item = rawId ? catalogById.get(rawId) : undefined
+    // Only maps cleanly onto the catalog's box price when the invoice priced this line
+    // by the case — a per-each price doesn't tell us the price of a box we haven't defined.
+    const invoicePrice = line.isCaseQuantity ? line.invoiceUnitPrice : null
+
+    // No quantity was written on the document for this line (e.g. a blank order guide) —
+    // default to 0 rather than guessing. Matching still runs as normal so the row shows a
+    // suggested match; the user types in what they're actually ordering.
+    if (line.invoiceQuantity == null) {
+      return {
+        rawText: line.rawText,
+        extractedName: line.extractedName,
+        quantity: 0,
+        unit: line.invoiceUnit,
+        isCaseQuantity: line.isCaseQuantity,
+        invoicePackSize: line.invoicePackSize,
+        invoicePrice,
+        matchedItemId: line.matchedItemId,
+        matchedItemName: line.matchedItemName,
+        confidence: line.confidence,
+        reasoning: `${line.reasoning} — no quantity was written for this line; defaulted to 0. Enter how many you're ordering.`,
+      }
+    }
 
     // Not a case quantity — the invoice already counts in the catalog's own unit, use as-is.
     if (!line.isCaseQuantity) {
-      return {
+      return{
         rawText: line.rawText,
         extractedName: line.extractedName,
         quantity: line.invoiceQuantity,
         unit: line.invoiceUnit,
+        isCaseQuantity: line.isCaseQuantity,
+        invoicePackSize: line.invoicePackSize,
+        invoicePrice,
         matchedItemId: line.matchedItemId,
         matchedItemName: line.matchedItemName,
         confidence: line.confidence,
@@ -209,6 +241,9 @@ export async function extractInvoiceLineItems(args: {
         extractedName: line.extractedName,
         quantity,
         unit: line.invoiceUnit,
+        isCaseQuantity: line.isCaseQuantity,
+        invoicePackSize: line.invoicePackSize,
+        invoicePrice,
         matchedItemId: line.matchedItemId,
         matchedItemName: line.matchedItemName,
         confidence: line.confidence,
@@ -229,6 +264,9 @@ export async function extractInvoiceLineItems(args: {
         extractedName: line.extractedName,
         quantity,
         unit: line.invoiceUnit,
+        isCaseQuantity: line.isCaseQuantity,
+        invoicePackSize: line.invoicePackSize,
+        invoicePrice,
         matchedItemId: line.matchedItemId,
         matchedItemName: line.matchedItemName,
         confidence: Math.min(line.confidence, 0.75),
@@ -246,6 +284,9 @@ export async function extractInvoiceLineItems(args: {
       extractedName: line.extractedName,
       quantity: line.invoiceQuantity,
       unit: line.invoiceUnit,
+      isCaseQuantity: line.isCaseQuantity,
+      invoicePackSize: line.invoicePackSize,
+      invoicePrice,
       matchedItemId: line.matchedItemId,
       matchedItemName: line.matchedItemName,
       confidence: Math.min(line.confidence, 0.5),

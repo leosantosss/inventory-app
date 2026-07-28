@@ -47,7 +47,7 @@ export default function InvoiceLoadingScreen({ fileName }: Props) {
   }, [])
 
   return (
-    <div className="max-w-sm mx-auto py-14 flex flex-col items-center animate-fade-in">
+    <div className="max-w-md mx-auto bg-white rounded-xl border border-gray-200 shadow-sm py-14 px-8 flex flex-col items-center animate-fade-in">
       <div className="relative w-20 h-20 mb-2 flex items-center justify-center">
         <span className="absolute inset-0 rounded-full bg-forest-500/30 animate-pulse-ring" />
         <span className="absolute inset-0 rounded-full bg-forest-500/30 animate-pulse-ring [animation-delay:1s]" />

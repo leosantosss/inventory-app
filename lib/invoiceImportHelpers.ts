@@ -25,11 +25,20 @@ export function isRowBlocking(row: ReviewRow): boolean {
   return row.resolution === 'auto-flagged'
 }
 
+// A row with quantity 0 and no new item to create wouldn't change anything if applied —
+// e.g. an order-guide line the user never filled in. Excluding it from "changes" keeps
+// zero-quantity lines from writing no-op entries into the history log.
+export function rowHasEffect(row: ReviewRow): boolean {
+  return row.resolution === 'user-created' || row.quantity !== 0
+}
+
 export function canApply(rows: ReviewRow[]): boolean {
-  return rows.some((r) => r.resolution !== 'excluded') && !rows.some(isRowBlocking)
+  return rows.some((r) => r.resolution !== 'excluded' && rowHasEffect(r)) && !rows.some(isRowBlocking)
 }
 
 export function confidenceBadge(row: ReviewRow): { label: string; tone: 'high' | 'medium' | 'low' } {
+  if (row.resolution === 'user-created') return { label: 'New item', tone: 'high' }
+  if (row.resolution === 'user-reassigned') return { label: 'Matched', tone: 'high' }
   if (!row.matchedItemId || row.confidence < BLOCKING_CONFIDENCE) return { label: 'Needs review', tone: 'low' }
   if (row.confidence < HIGH_CONFIDENCE) return { label: 'Check this', tone: 'medium' }
   return { label: 'High match', tone: 'high' }

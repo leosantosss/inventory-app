@@ -9,6 +9,10 @@ interface Props {
   onSaved: (item: ItemDoc) => void
   initialName?: string
   initialStartingValue?: number
+  initialUnitsPerBox?: number | null
+  unitsPerBoxNeedsReview?: boolean
+  initialBoxPrice?: number | null
+  boxPriceNeedsReview?: boolean
 }
 
 const unitLabels: Record<Unit, string> = { count: 'Count (units)', lbs: 'Pounds (lbs)' }
@@ -18,14 +22,24 @@ const alcoholTypes: AlcoholType[] = [
   'gin', 'cognac', 'brandy', 'wine', 'liqueur', 'other',
 ]
 
-export default function AddItemModal({ category, onClose, onSaved, initialName, initialStartingValue }: Props) {
+export default function AddItemModal({
+  category,
+  onClose,
+  onSaved,
+  initialName,
+  initialStartingValue,
+  initialUnitsPerBox,
+  unitsPerBoxNeedsReview,
+  initialBoxPrice,
+  boxPriceNeedsReview,
+}: Props) {
   const { showToast } = useToast()
   const [name, setName] = useState(initialName ?? '')
   const [unit, setUnit] = useState<Unit>('count')
   const [startingValue, setStartingValue] = useState(String(initialStartingValue ?? 0))
   const [subcategory, setSubcategory] = useState<AlcoholType | ''>('')
-  const [unitsPerBox, setUnitsPerBox] = useState('')
-  const [boxPrice, setBoxPrice] = useState('')
+  const [unitsPerBox, setUnitsPerBox] = useState(initialUnitsPerBox != null ? String(initialUnitsPerBox) : '')
+  const [boxPrice, setBoxPrice] = useState(initialBoxPrice != null ? String(initialBoxPrice) : '')
   const [minStock, setMinStock] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -120,9 +134,23 @@ export default function AddItemModal({ category, onClose, onSaved, initialName, 
 
             <div className="flex flex-col gap-2 pt-1 border-t border-gray-100">
               <span className="text-sm font-medium text-gray-500 pt-3">Box &amp; Pricing (optional)</span>
+              {(() => {
+                const missing = [
+                  unitsPerBoxNeedsReview && !unitsPerBox.trim() && 'case size',
+                  boxPriceNeedsReview && !boxPrice.trim() && 'price',
+                ].filter(Boolean) as string[]
+                if (missing.length === 0) return null
+                return (
+                  <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    The invoice&apos;s {missing.join(' and ')} wasn&apos;t legible — enter {missing.length > 1 ? 'them' : 'it'} below if you know {missing.length > 1 ? 'them' : 'it'}.
+                  </p>
+                )
+              })()}
               <div className="grid grid-cols-3 gap-2">
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-400">Units/Box</span>
+                  <span className={`text-xs ${unitsPerBoxNeedsReview && !unitsPerBox.trim() ? 'text-amber-700 font-semibold' : 'text-gray-400'}`}>
+                    Units/Box
+                  </span>
                   <input
                     type="number"
                     min="0"
@@ -130,11 +158,15 @@ export default function AddItemModal({ category, onClose, onSaved, initialName, 
                     value={unitsPerBox}
                     onChange={(e) => setUnitsPerBox(e.target.value)}
                     placeholder="—"
-                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                    className={`border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 ${
+                      unitsPerBoxNeedsReview && !unitsPerBox.trim() ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
+                    }`}
                   />
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-400">Box Price ($)</span>
+                  <span className={`text-xs ${boxPriceNeedsReview && !boxPrice.trim() ? 'text-amber-700 font-semibold' : 'text-gray-400'}`}>
+                    Box Price ($)
+                  </span>
                   <input
                     type="number"
                     min="0"
@@ -142,7 +174,9 @@ export default function AddItemModal({ category, onClose, onSaved, initialName, 
                     value={boxPrice}
                     onChange={(e) => setBoxPrice(e.target.value)}
                     placeholder="—"
-                    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500"
+                    className={`border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-500 ${
+                      boxPriceNeedsReview && !boxPrice.trim() ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
+                    }`}
                   />
                 </label>
                 <label className="flex flex-col gap-1">
