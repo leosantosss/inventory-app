@@ -50,18 +50,18 @@ function PriceLogCard({ entry }: { entry: PriceLogEntry }) {
   return (
     <div className="print-card mb-4 rounded-lg border border-gray-200 overflow-hidden shadow-sm">
       <div className="flex items-stretch">
-        <div className="w-1 shrink-0 bg-forest" />
-        <div className="flex-1 px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-start justify-between gap-4">
+        <div className="w-1 shrink-0 bg-forest print-accent" />
+        <div className="flex-1 px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-start justify-between gap-4 print-session-head">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-forest text-white">
+              <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-forest text-white print-badge">
                 {isImport ? 'CSV Import' : 'Manual'}
               </span>
-              <span className="text-xs text-gray-400">by {entry.displayName}</span>
+              <span className="text-xs text-gray-400 print-muted">by {entry.displayName}</span>
             </div>
             <p className="text-sm font-medium text-gray-700 mt-1">{entry.itemName}</p>
           </div>
-          <span className="text-xs text-gray-400 shrink-0 mt-0.5 font-mono">{formatTime(entry.createdAt)}</span>
+          <span className="text-xs text-gray-400 shrink-0 mt-0.5 font-mono print-muted">{formatTime(entry.createdAt)}</span>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ function PriceLogCard({ entry }: { entry: PriceLogEntry }) {
               <td className="px-4 py-2 text-sm text-gray-500 text-right tabular-nums border-r border-gray-200">
                 {formatValue(change.field, change.oldValue)}
               </td>
-              <td className="px-4 py-2 text-sm text-gray-800 text-right tabular-nums font-semibold">
+              <td className="px-4 py-2 text-sm text-gray-800 text-right tabular-nums font-semibold print-plain">
                 {formatValue(change.field, change.newValue)}
               </td>
             </tr>

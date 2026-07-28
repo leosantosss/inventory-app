@@ -42,7 +42,7 @@ function LogRow({ log, index }: { log: LogDoc; index: number }) {
     <tr className={bg}>
       <td className="px-4 py-2 text-sm text-gray-800 border-r border-gray-200">
         {log.itemName}
-        {isAdded && <span className="ml-2 text-xs text-blue-500 font-medium">(new)</span>}
+        {isAdded && <span className="ml-2 text-xs text-blue-500 font-medium print-muted">(new)</span>}
       </td>
       <td className="px-4 py-2 text-sm text-gray-500 text-right tabular-nums border-r border-gray-200">
         {isAdded ? '—' : `${log.oldValue} ${log.unit}`}
@@ -52,10 +52,10 @@ function LogRow({ log, index }: { log: LogDoc; index: number }) {
       </td>
       <td className="px-4 py-2 text-right">
         {isAdded ? (
-          <span className="text-xs font-semibold text-blue-600">Added</span>
+          <span className="text-xs font-semibold text-blue-600 print-plain">Added</span>
         ) : (
-          <span className={`text-sm font-semibold tabular-nums ${
-            delta > 0 ? 'text-forest' : delta < 0 ? 'text-crimson-800' : 'text-gray-400'
+          <span className={`text-sm font-semibold tabular-nums print-plain ${
+            delta > 0 ? 'text-forest' : delta < 0 ? 'text-crimson-800 print-negative' : 'text-gray-400'
           }`}>
             {delta > 0 ? '+' : ''}{delta}
           </span>
@@ -73,21 +73,21 @@ function SessionCard({ entry }: { entry: HistoryEntry }) {
     <div className="print-card mb-4 rounded-lg border border-gray-200 overflow-hidden shadow-sm">
       {/* Session header */}
       <div className="flex items-stretch">
-        <div className="w-1 shrink-0" style={{ backgroundColor: accentColor }} />
-        <div className="flex-1 px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-start justify-between gap-4">
+        <div className="w-1 shrink-0 print-accent" style={{ backgroundColor: accentColor }} />
+        <div className="flex-1 px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-start justify-between gap-4 print-session-head">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <span
-                className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+                className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded print-badge"
                 style={{ backgroundColor: accentColor, color: 'white' }}
               >
                 {isIn ? '▲ Bringing In' : '▼ Taking Out'}
               </span>
-              <span className="text-xs text-gray-400">by {entry.displayName}</span>
+              <span className="text-xs text-gray-400 print-muted">by {entry.displayName}</span>
             </div>
             <p className="text-sm font-medium text-gray-700 mt-1">{entry.note}</p>
           </div>
-          <span className="text-xs text-gray-400 shrink-0 mt-0.5 font-mono">{formatTime(entry.createdAt)}</span>
+          <span className="text-xs text-gray-400 shrink-0 mt-0.5 font-mono print-muted">{formatTime(entry.createdAt)}</span>
         </div>
       </div>
 

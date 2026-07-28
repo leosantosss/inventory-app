@@ -64,13 +64,24 @@ export default function HistoryPage() {
         ))}
       </div>
 
-      {showSkeleton ? (
-        <TableSkeleton rows={5} />
-      ) : tab === 'inventory' ? (
-        <HistoryFeed entries={entries} hideTitle />
-      ) : (
-        <PriceHistoryFeed entries={priceEntries} />
-      )}
+      {/* Printed report masthead (screen-hidden, print-only) */}
+      <div className="hidden print:flex items-baseline justify-between mb-3 pb-2 border-b-2 border-gray-800">
+        <h1 className="text-xl font-bold text-gray-900">Inventory History Report</h1>
+        <span className="text-xs text-gray-500">
+          {tab === 'inventory' ? 'Inventory Changes' : 'Price Changes'} &middot; Printed{' '}
+          {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        </span>
+      </div>
+
+      <div className="history-print">
+        {showSkeleton ? (
+          <TableSkeleton rows={5} />
+        ) : tab === 'inventory' ? (
+          <HistoryFeed entries={entries} hideTitle />
+        ) : (
+          <PriceHistoryFeed entries={priceEntries} />
+        )}
+      </div>
     </div>
   )
 }

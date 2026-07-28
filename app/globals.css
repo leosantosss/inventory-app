@@ -69,19 +69,77 @@ input[type='number'] {
 
 @media print {
   /* Hide everything except the history content */
-  header, nav, .print-hide { display: none !important; }
+  header, nav, aside, .print-hide { display: none !important; }
 
   body { background: white !important; color: black !important; }
 
   /* Remove padding added for the bottom tab bar */
   .pb-24 { padding-bottom: 0 !important; }
 
+  @page { margin: 12mm 10mm; }
+
+  /* Scale the whole report down so text/padding/margins shrink together
+     (Tailwind's spacing & type scale are rem-based, so this alone turns
+     the oversized on-screen cards into a dense, table-like print layout) */
+  html { font-size: 75%; }
+
   /* Keep session cards readable */
   .bg-white { background: white !important; }
   .shadow-sm, .shadow-md { box-shadow: none !important; }
 
-  /* Force page breaks between long histories */
-  .print-card { page-break-inside: avoid; }
+  /* Tighten the spacing that stays disproportionately large after scaling */
+  .history-print .mb-8 { margin-bottom: 0.6rem !important; }
+  .history-print .mb-4 { margin-bottom: 0.35rem !important; }
+  .history-print .mb-3 { margin-bottom: 0.25rem !important; }
+  .history-print .py-3 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+
+  /* Flat, gridlined spreadsheet look instead of soft rounded on-screen cards */
+  .history-print .print-card {
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    /* Let long sessions flow across pages instead of being forced onto a
+       fresh page (which left the first page almost blank) */
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  .history-print .print-card tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .history-print table thead {
+    display: table-header-group;
+  }
+
+  /* Drop the colored accent bar and colored pill badge for a plain black-on-white label */
+  .history-print .print-accent { display: none !important; }
+  .history-print .print-session-head {
+    background: #e5e7eb !important;
+    border-bottom: 1px solid #000 !important;
+  }
+  .history-print .print-badge {
+    background: none !important;
+    color: #000 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+  .history-print .print-muted { color: #444 !important; }
+  .history-print .print-plain { color: #000 !important; }
+  .history-print .print-negative { color: #b91c1c !important; }
+
+  /* Solid gridlines for a proper data-table look */
+  .history-print table { border-collapse: collapse !important; }
+  .history-print th, .history-print td { border: 1px solid #999 !important; }
+  .history-print th { background: #eef0f2 !important; }
+
+  /* Plain black text everywhere: no blue links, no colored deltas by default */
+  .history-print a,
+  .history-print .text-blue-500,
+  .history-print .text-blue-600,
+  .history-print .text-forest {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
 }
 
 @layer base {
