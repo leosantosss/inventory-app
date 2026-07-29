@@ -118,11 +118,11 @@ export default function EditItemModal({ item, onClose, onSaved }: Props) {
               <span className="text-sm font-medium text-gray-500 pt-3">Box &amp; Pricing (optional)</span>
               <div className="grid grid-cols-3 gap-2">
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs text-gray-400">Units/Box</span>
+                  <span className="text-xs text-gray-400">{unit === 'lbs' ? 'Box Weight (lbs)' : 'Units/Box'}</span>
                   <input
                     type="number"
                     min="0"
-                    step="1"
+                    step={unit === 'lbs' ? '0.1' : '1'}
                     value={unitsPerBox}
                     onChange={(e) => setUnitsPerBox(e.target.value)}
                     placeholder="—"

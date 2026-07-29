@@ -5,10 +5,10 @@ import InvoiceLoadingScreen from './InvoiceLoadingScreen'
 import type { InvoiceExtractionResult } from '@/types'
 
 const MAX_FILE_BYTES = 15 * 1024 * 1024
-const ACCEPT = 'application/pdf,image/jpeg,image/png,image/webp'
+const ACCEPT = 'application/pdf,image/jpeg,image/png,image/webp,.tsv,text/tab-separated-values'
 
 const STEPS = [
-  { title: 'Upload', desc: 'Snap a photo or attach a PDF of the delivery invoice.' },
+  { title: 'Upload', desc: 'Snap a photo, attach a PDF, or drop in a TSV export of the delivery invoice.' },
   { title: 'AI reads it', desc: "We extract every line item and match it to your inventory automatically." },
   { title: 'Review & apply', desc: 'Confirm any flagged matches, then apply to update stock and pricing.' },
 ]
@@ -34,8 +34,9 @@ export default function InvoiceUploadPanel({ onExtracted }: Props) {
       showToast('HEIC photos aren’t supported yet — try "Save as JPEG" or share via a Files app export.', 'error')
       return
     }
-    if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(picked.type)) {
-      showToast('Please use a JPEG, PNG, or WebP photo, or a PDF.', 'error')
+    const isTsv = picked.type === 'text/tab-separated-values' || /\.tsv$/i.test(picked.name)
+    if (!isTsv && !['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(picked.type)) {
+      showToast('Please use a JPEG, PNG, or WebP photo, a PDF, or a TSV file.', 'error')
       return
     }
     if (picked.size > MAX_FILE_BYTES) {
@@ -90,7 +91,7 @@ export default function InvoiceUploadPanel({ onExtracted }: Props) {
       <div className="mb-5">
         <h1 className="font-display text-2xl font-bold text-forest mb-1">Import Invoice</h1>
         <p className="text-sm text-gray-500 max-w-2xl">
-          Upload a delivery invoice — a photo or a PDF — and we&apos;ll read the line items and match them to your inventory.
+          Upload a delivery invoice — a photo, a PDF, or a TSV export — and we&apos;ll read the line items and match them to your inventory.
         </p>
       </div>
 
@@ -110,7 +111,7 @@ export default function InvoiceUploadPanel({ onExtracted }: Props) {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 3v12" /><path d="M7 8l5-5 5 5" /><path d="M5 21h14" />
             </svg>
-            <span className="text-sm font-medium">{file ? file.name : 'Drag & drop, or click to choose a photo or PDF'}</span>
+            <span className="text-sm font-medium">{file ? file.name : 'Drag & drop, or click to choose a photo, PDF, or TSV file'}</span>
             {file && <span className="text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(1)} MB</span>}
           </button>
 
@@ -149,7 +150,7 @@ export default function InvoiceUploadPanel({ onExtracted }: Props) {
             ))}
           </ol>
           <p className="pt-3 border-t border-gray-100 text-xs text-gray-400">
-            Accepts JPEG, PNG, WebP, or PDF — up to 15MB.
+            Accepts JPEG, PNG, WebP, PDF, or TSV — up to 15MB.
           </p>
         </div>
       </div>

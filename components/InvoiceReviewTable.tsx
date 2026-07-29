@@ -169,14 +169,14 @@ export default function InvoiceReviewTable({ result, onBack, onApplied }: Props)
       <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-gray-200">
+            <tr className="border-b border-gray-300">
               <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-left">Line Item</th>
               <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-left">Match</th>
               <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">Qty</th>
               <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-300">
             {rows.map((row) => {
               const badge = confidenceBadge(row)
               const excluded = row.resolution === 'excluded'

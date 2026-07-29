@@ -154,12 +154,14 @@ export default function PricesTable({ items, onRefresh }: Props) {
           </div>
         </td>
         <td className="px-4 py-3 text-sm text-gray-500">{categoryLabels[item.category]}</td>
-        <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">{item.unitsPerBox ?? '—'}</td>
+        <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">
+          {item.unitsPerBox != null ? `${item.unitsPerBox}${item.unit === 'lbs' ? ' lbs' : ''}` : '—'}
+        </td>
         <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">
           {item.boxPrice != null ? money(item.boxPrice) : '—'}
         </td>
         <td className="px-4 py-3 text-sm text-right tabular-nums text-gray-500">
-          {perUnit != null ? money(perUnit) : '—'}
+          {perUnit != null ? `${money(perUnit)}${item.unit === 'lbs' ? '/lb' : ''}` : '—'}
         </td>
         <td className="px-4 py-3 text-sm text-right tabular-nums font-semibold text-forest">
           {value > 0 ? money(value) : '—'}

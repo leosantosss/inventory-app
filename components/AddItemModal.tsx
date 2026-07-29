@@ -149,12 +149,12 @@ export default function AddItemModal({
               <div className="grid grid-cols-3 gap-2">
                 <label className="flex flex-col gap-1">
                   <span className={`text-xs ${unitsPerBoxNeedsReview && !unitsPerBox.trim() ? 'text-amber-700 font-semibold' : 'text-gray-400'}`}>
-                    Units/Box
+                    {unit === 'lbs' ? 'Box Weight (lbs)' : 'Units/Box'}
                   </span>
                   <input
                     type="number"
                     min="0"
-                    step="1"
+                    step={unit === 'lbs' ? '0.1' : '1'}
                     value={unitsPerBox}
                     onChange={(e) => setUnitsPerBox(e.target.value)}
                     placeholder="—"

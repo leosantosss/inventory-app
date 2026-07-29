@@ -6,7 +6,9 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5'
 
 const TOOL_NAME = 'record_invoice_line_items'
 
-const SYSTEM_PROMPT = `You read restaurant delivery invoices (photos or PDFs) and extract line items to match against an existing inventory catalog. You do NOT do any case-to-unit conversion math yourself — you only report exactly what's printed on the invoice, and the app computes the final stock quantity afterward using the catalog's own case-size data for the matched item.
+const SYSTEM_PROMPT = `You read restaurant delivery invoices (photos, PDFs, or TSV text exports) and extract line items to match against an existing inventory catalog. You do NOT do any case-to-unit conversion math yourself — you only report exactly what's printed on the invoice, and the app computes the final stock quantity afterward using the catalog's own case-size data for the matched item.
+
+Some invoices arrive as a TSV (tab-separated values) text file exported from a vendor's ordering system instead of a scanned document. Treat the first row as a header naming each column (e.g. Item, Qty, Unit, Price) and use those headers the same way you'd read a printed column heading — vendors don't all use the same column names or order.
 
 Some documents are blank order guides instead of a completed invoice — a vendor's full catalog of orderable items, printed with empty boxes where a person would normally handwrite how many they want. Read those the same way, except quantity is usually blank across most or all lines: report every single line item printed on it as its own entry, with invoiceQuantity: null on each one that has nothing filled in. A blank order guide with 200 printed items must produce 200 lineItems entries, not zero — "nothing has been ordered yet" is not a reason to return an empty list. Do not summarize, sample, or skip items to save space, no matter how many pages or how repetitive the catalog is — enumerate every one. A separate "Pack" or "Case Pack" column on an order guide counts the same as a pack size stated in the item description.
 
@@ -115,21 +117,28 @@ export async function extractInvoiceLineItems(args: {
   vendorHint?: string
   catalog: CatalogRow[]
 }): Promise<InvoiceExtractionResult> {
-  const bytes = Buffer.from(await args.file.arrayBuffer())
-  const base64 = bytes.toString('base64')
-  const mediaType = args.file.type || 'image/jpeg'
-  const isPdf = mediaType === 'application/pdf'
+  const isTsv = /\.tsv$/i.test(args.filename) || args.file.type === 'text/tab-separated-values'
 
-  const fileBlock: Anthropic.ImageBlockParam | Anthropic.DocumentBlockParam = isPdf
-    ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
-    : {
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
-          data: base64,
-        },
-      }
+  let fileBlock: Anthropic.ImageBlockParam | Anthropic.DocumentBlockParam | Anthropic.TextBlockParam
+  if (isTsv) {
+    const tsvText = await args.file.text()
+    fileBlock = { type: 'text', text: `Invoice file "${args.filename}" (tab-separated values):\n\n${tsvText}` }
+  } else {
+    const bytes = Buffer.from(await args.file.arrayBuffer())
+    const base64 = bytes.toString('base64')
+    const mediaType = args.file.type || 'image/jpeg'
+    const isPdf = mediaType === 'application/pdf'
+    fileBlock = isPdf
+      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
+      : {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
+            data: base64,
+          },
+        }
+  }
 
   const catalogTsv = serializeCatalogForPrompt(args.catalog)
 

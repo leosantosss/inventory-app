@@ -68,7 +68,7 @@ export default function ItemRow({ item, onEdit, sessionMode, changeInfo, onQuick
           </>
         )}
       </td>
-      <td className="px-4 py-3 text-sm text-gray-500">{unitLabel}</td>
+      <td className="px-4 py-3 text-sm text-gray-300">{unitLabel}</td>
       <td className="px-2 py-3 text-right">
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(item) }}

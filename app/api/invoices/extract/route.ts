@@ -29,13 +29,15 @@ export async function POST(request: NextRequest) {
   if (file.size > MAX_FILE_BYTES) {
     return NextResponse.json({ error: 'File is too large — must be under 15MB' }, { status: 413 })
   }
-  if (!ALLOWED_TYPES.has(file.type)) {
-    return NextResponse.json({ error: 'Unsupported file type — use a JPEG/PNG/WebP photo or a PDF' }, { status: 415 })
-  }
 
   const vendorHintRaw = form.get('vendorHint')
   const vendorHint = typeof vendorHintRaw === 'string' && vendorHintRaw.trim() ? vendorHintRaw.trim() : undefined
   const filename = file instanceof File ? file.name : 'invoice'
+  const isTsv = /\.tsv$/i.test(filename) || file.type === 'text/tab-separated-values'
+
+  if (!ALLOWED_TYPES.has(file.type) && !isTsv) {
+    return NextResponse.json({ error: 'Unsupported file type — use a JPEG/PNG/WebP photo, a PDF, or a TSV file' }, { status: 415 })
+  }
 
   try {
     const items = await getAllItems()
