@@ -77,7 +77,7 @@ function CollapseIcon({ collapsed }: { collapsed: boolean }) {
 
 function Logo() {
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/logo.png" alt="Chycho's" className="w-9 h-9 rounded-lg object-contain shrink-0 bg-white" />
+  return <img src="/logo.png" alt="Chycho's" className="w-9 h-9 object-contain shrink-0 bg-white" />
 }
 
 function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onNavigate?: () => void; counts: Record<Category, number> | null }) {
@@ -91,14 +91,14 @@ function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onN
   const importActive = pathname.startsWith('/inventory/import')
 
   const linkClass = (active: boolean) =>
-    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors border-l-2 ${
+    `flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors border-l-2 ${
       active
         ? 'bg-crimson-50 text-crimson-800 border-crimson'
-        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 border-transparent'
+        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 border-transparent'
     }`
 
   return (
-    <nav className="flex-1 px-2 py-3 flex flex-col gap-1 overflow-y-auto">
+    <nav className="flex-1 flex flex-col overflow-y-auto py-2">
       <Link href="/inventory/dashboard" onClick={onNavigate} className={linkClass(dashboardActive)}>
         <DashboardIcon />
         {!collapsed && <span>Dashboard</span>}
@@ -106,7 +106,7 @@ function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onN
 
       <button
         onClick={() => setInventoryOpen((v) => !v)}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
           inventoryActive ? 'text-crimson-800' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
         }`}
       >
@@ -120,7 +120,7 @@ function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onN
       </button>
 
       {inventoryOpen && !collapsed && (
-        <div className="ml-6 flex flex-col gap-0.5 border-l border-gray-200 pl-3">
+        <div className="ml-6 flex flex-col border-l border-gray-200 pl-3">
           {inventoryLinks.map((link) => {
             const href = `/inventory/${link.category}`
             const active = pathname.startsWith(href)
@@ -129,7 +129,7 @@ function NavContent({ collapsed, onNavigate, counts }: { collapsed: boolean; onN
                 key={link.category}
                 href={href}
                 onClick={onNavigate}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                className={`flex items-center justify-between px-3 py-1.5 text-sm transition-colors ${
                   active ? 'bg-crimson-50 text-crimson-800 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
                 }`}
               >
@@ -181,26 +181,25 @@ export default function Sidebar() {
     <>
       {/* Desktop rail */}
       <aside
-        className={`hidden md:flex flex-col bg-white border-r border-gray-200 sticky top-0 h-screen shrink-0 transition-all duration-200 ${
+        className={`hidden md:flex flex-col bg-white border-r border-gray-200 sticky top-0 h-screen shrink-0 transition-all duration-200 relative ${
           collapsed ? 'w-16' : 'w-56'
         }`}
       >
-        <div className={`flex items-center h-14 px-4 border-b border-gray-100 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        <div className={`flex items-center h-[61px] px-4 border-b border-gray-200 gap-2 ${collapsed ? 'justify-center' : ''}`}>
+          <Logo />
           {!collapsed && (
-            <div className="flex items-center gap-2 min-w-0">
-              <Logo />
-              <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho&apos;s</span>
-            </div>
+            <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho&apos;s</span>
           )}
-          <button
-            onClick={() => setCollapsed((v) => !v)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <CollapseIcon collapsed={collapsed} />
-          </button>
         </div>
         <NavContent collapsed={collapsed} counts={counts} />
+
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          className="absolute top-4 -right-3 w-6 h-6 rounded-full bg-white border border-gray-300 shadow-sm flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-400 transition-colors z-10"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <CollapseIcon collapsed={collapsed} />
+        </button>
       </aside>
 
       {/* Mobile drawer */}
@@ -211,14 +210,14 @@ export default function Sidebar() {
             className="relative bg-white w-64 h-full flex flex-col shadow-xl animate-drawer-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100">
+            <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
               <div className="flex items-center gap-2 min-w-0">
                 <Logo />
                 <span className="font-display text-gray-900 text-base font-bold tracking-widest truncate">Chycho&apos;s</span>
               </div>
               <button
                 onClick={closeMobile}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
+                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
                 aria-label="Close menu"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
