@@ -59,6 +59,15 @@ input[type='number'] {
   100% { transform: scale(1.4); opacity: 0; }
 }
 
+@keyframes flow-line {
+  to { stroke-dashoffset: -1000; }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-2%, 2%); }
+}
+
 .animate-backdrop-in { animation: backdrop-in 0.2s ease-out; }
 .animate-sheet-up { animation: sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1); }
 .animate-drawer-in { animation: drawer-in 0.25s cubic-bezier(0.32, 0.72, 0, 1); }
@@ -66,6 +75,8 @@ input[type='number'] {
 .animate-check-draw { animation: check-draw 0.35s ease-out forwards; }
 .animate-scan-sweep { animation: scan-sweep 2.4s ease-in-out infinite; }
 .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-flow-line { animation: flow-line 12s linear infinite; }
+.animate-drift { animation: drift 14s ease-in-out infinite; }
 
 @media print {
   /* Hide everything except the history content */
