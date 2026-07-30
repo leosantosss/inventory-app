@@ -28,6 +28,7 @@ export interface LogDoc {
   newValue: number
   delta: number
   unit: Unit
+  unitCost: number | null
   isNewItem?: boolean
   createdAt: string
 }
@@ -45,6 +46,7 @@ export interface HistoryEntry {
 export interface ChangeEntry {
   itemId: string
   newValue: number
+  unitCost?: number | null
 }
 
 export interface PriceChange {

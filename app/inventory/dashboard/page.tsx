@@ -1,10 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import HistoryFeed from '@/components/HistoryFeed'
+import InventoryFlowChart from '@/components/InventoryFlowChart'
+import InventoryValueSankey from '@/components/InventoryValueSankey'
 import { DashboardSkeleton } from '@/components/Skeleton'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import type { HistoryEntry, Category } from '@/types'
+import type { MonthlyFlowPoint, SankeyData } from '@/lib/inventoryFlowTypes'
 
 interface LowStockItem {
   _id: string
@@ -22,6 +26,8 @@ interface DashboardStats {
   valueByCategory: { category: Category; label: string; value: number }[]
   lowStock: LowStockItem[]
   recentActivity: HistoryEntry[]
+  monthlyFlow: MonthlyFlowPoint[]
+  valueBreakdown: SankeyData
 }
 
 const compactCurrency = new Intl.NumberFormat('en-US', {
@@ -121,6 +127,7 @@ function LowStockTable({ items }: { items: LowStockItem[] }) {
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession()
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
   useDocumentTitle('Dashboard')
@@ -137,7 +144,9 @@ export default function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="font-display text-2xl font-bold text-forest mb-4">Dashboard</h1>
+      <h1 className="font-display text-2xl font-bold text-forest mb-4">
+        Welcome{session?.user?.name ? `, ${session.user.name}` : ''}
+      </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
         <StatTile label="Total Inventory Value" value={compactCurrency.format(stats.totalValue)} />
@@ -148,6 +157,14 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
         <ValueByCategoryChart data={stats.valueByCategory} />
         <LowStockTable items={stats.lowStock} />
+      </div>
+
+      <div className="mb-5">
+        <InventoryFlowChart data={stats.monthlyFlow} />
+      </div>
+
+      <div className="mb-5">
+        <InventoryValueSankey data={stats.valueBreakdown} />
       </div>
 
       <div>

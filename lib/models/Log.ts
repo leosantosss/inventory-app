@@ -9,6 +9,7 @@ export interface ILog extends Document {
   newValue: number
   delta: number
   unit: Unit
+  unitCost: number | null
   isNewItem: boolean
   createdAt: Date
 }
@@ -21,6 +22,7 @@ const LogSchema = new Schema<ILog>({
   newValue: { type: Number, required: true },
   delta: { type: Number, required: true },
   unit: { type: String, enum: ['count', 'lbs'], required: true },
+  unitCost: { type: Number, default: null },
   isNewItem: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 })

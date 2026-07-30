@@ -116,7 +116,12 @@ export default function InvoiceReviewTable({ result, onBack, onApplied }: Props)
         .map((r) => {
           const item = catalogById.get(r.matchedItemId!)
           const base = item ? (item.unit === 'count' ? item.currentCount ?? 0 : item.currentLbs ?? 0) : 0
-          return { itemId: r.matchedItemId, newValue: base + r.quantity }
+          // invoicePrice is per-case (only ever set when the line was priced by the case);
+          // dividing by the same pack size used to convert the case count into stock units
+          // gives the actual per-unit cost of this restock, independent of quantity.
+          const packSizeUsed = item?.unitsPerBox ?? r.invoicePackSize ?? null
+          const unitCost = r.invoicePrice != null && packSizeUsed ? r.invoicePrice / packSizeUsed : null
+          return { itemId: r.matchedItemId, newValue: base + r.quantity, unitCost }
         })
       const newItemIds = rows.filter((r) => r.resolution === 'user-created' && r.createdItemId).map((r) => r.createdItemId!)
 

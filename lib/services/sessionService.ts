@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb'
 import Session from '@/lib/models/Session'
 import Log from '@/lib/models/Log'
 import Item from '@/lib/models/Item'
+import { pricePerUnit } from '@/lib/itemCalc'
 import type { Direction, ChangeEntry } from '@/types'
 
 export async function createUpdateSession(data: {
@@ -41,6 +42,7 @@ export async function createUpdateSession(data: {
       newValue: change.newValue,
       delta,
       unit: item.unit,
+      unitCost: change.unitCost ?? pricePerUnit(item) ?? null,
       isNewItem: newItemIdSet.has(String(item._id)),
     })
 
@@ -69,6 +71,7 @@ export async function createUpdateSession(data: {
       newValue: value,
       delta: value,
       unit: item.unit,
+      unitCost: pricePerUnit(item) ?? null,
       isNewItem: true,
     })
   }

@@ -1,5 +1,6 @@
 import { getAllItems } from './itemService'
 import { getRecentHistory } from './historyService'
+import { getMonthlyFlow, getValueBreakdown } from './inventoryFlowService'
 import { itemQuantity, lineValue, isLowStock } from '@/lib/itemCalc'
 import type { Category } from '@/types'
 
@@ -11,6 +12,8 @@ const categoryLabels: Record<Category, string> = {
 
 export async function getDashboardStats() {
   const [items, history] = await Promise.all([getAllItems(), getRecentHistory()])
+  const monthlyFlow = await getMonthlyFlow(items)
+  const valueBreakdown = getValueBreakdown(items)
 
   let totalValue = 0
   const valueByCategory: Record<Category, number> = { cooler: 0, bar: 0, dry: 0 }
@@ -54,5 +57,7 @@ export async function getDashboardStats() {
     })),
     lowStock,
     recentActivity: history.slice(0, 5),
+    monthlyFlow,
+    valueBreakdown,
   }
 }
